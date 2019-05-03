@@ -1,7 +1,7 @@
 var express = require('express');
 var app = express();
 var path = require('path');
-var db = require('./lib/db');
+var db = require('./lib/db.js');
 var template = require('./lib/template.js');
 var bodyParser = require('body-parser');
 app.use(express.static(path.join(__dirname, 'www')));
@@ -10,12 +10,17 @@ app.use('/js', express.static(path.join(__dirname,  'bootstrap-3.3.2', 'dist', '
 app.use('/css', express.static(path.join(__dirname, 'bootstrap-3.3.2', 'dist', 'css')));
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// root 접근
+/**
+ * root 접근 → 표준단어를 default 페이지로 설정
+ */
 app.get('/', function (request, response) {
   response.redirect('/word');
 });
 
-// 메뉴별 접근
+/**
+ * 메뉴별 접근
+ * mode : word, domain, attribute, entity
+ */ 
 app.get('/:mode', function (request, response, next) {
   var mode = path.parse(request.params.mode).base;
 
@@ -62,11 +67,13 @@ app.get('/:mode', function (request, response, next) {
     );
   } else {
     next();
+    //response.send("Comming Soon..");
   }
 });
 
 /**
  * 추가
+ * mode : word, domain, attribute, entity
  */
 app.post('/create/:mode', function (request, response, next) {
   var mode = path.parse(request.params.mode).base;
@@ -77,8 +84,8 @@ app.post('/create/:mode', function (request, response, next) {
     db.query(
       `
       INSERT INTO WORD (NAME, ABBREVIATION, FULLNAME, SORTATION, DEFINITION, WRITEDATE, SYSTEM)
-      VALUES(?, ?, ?, ?, ?,  now(), 'SUPER')`, 
-      [post.name, post.abbreviation, post.fullName, post.sortation, post.definition],
+      VALUES(?, ?, ?, ?, ?,  now(), '0')`, 
+      [post.wordName, post.wordAbbreviation, post.wordFullName, post.wordSortation, post.wordDefinition],
       function (error, result) {
         if(error) {
           next(error);
@@ -87,8 +94,81 @@ app.post('/create/:mode', function (request, response, next) {
         db.query(
           `
           INSERT INTO WORDHISTORY (WORDSEQ, NAME, ABBREVIATION, FULLNAME, SORTATION, DEFINITION, WRITEID, WRITEDATE, SYSTEM)
-          VALUES(?, ?, ?, ?, ?, ?, ?, now(), 'SUPER')`, 
-          [result.insertId, post.name, post.abbreviation, post.fullName, post.sortation, post.definition, post.id],
+          VALUES(?, ?, ?, ?, ?, ?, ?, now(), '0')`, 
+          [result.insertId, post.wordName, post.wordAbbreviation, post.wordFullName, post.wordSortation, post.wordDefinition, post.id],
+          function (error, result) {
+            if(error) {
+              next(error);
+            }
+            response.redirect(`/word`);
+          }
+        );
+      }
+    );
+  } else if ("domain" == mode) {
+    db.query(
+      `
+      INSERT INTO DOMAIN (GROUPNAME, NAME, DATATYPE, DATALENGTH, DATADECIMAL, ABBREVIATION, FULLNAME, DEFINITION, WRITEDATE, SYSTEM)
+      VALUES(?, ?, ?, ?, ?, ?, ?, ?, NOW(), '0')`, 
+      [post.domainGroupName, post.domainName, post.domainDataType, post.domainDataLength, post.domainDataDecimal, post.domainAbbreviation, post.domainFullName, post.domainDefinition],
+      function (error, result) {
+        if(error) {
+          next(error);
+        }
+        
+        db.query(
+          `
+          INSERT INTO DOMAINHISTORY (DOMAINSEQ, GROUPNAME, NAME, DATATYPE, DATALENGTH, DATADECIMAL, ABBREVIATION, FULLNAME, DEFINITION, WRITEID, WRITEDATE, SYSTEM)
+          VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), '0')`, 
+          [result.insertId, post.domainGroupName, post.domainName, post.domainDataType, post.domainDataLength, post.domainDataDecimal, post.domainAbbreviation, post.domainFullName, post.domainDefinition, post.id],
+          function (error, result) {
+            if(error) {
+              next(error);
+            }
+            response.redirect(`/domain`);
+          }
+        );
+      }
+    );
+    response.redirect(`/domain`);
+  } 
+
+});
+
+/**
+ * 수정
+ * mode : word, domain, attribute, entity
+ */
+app.post('/update/:mode', function (request, response, next) {
+  var mode = path.parse(request.params.mode).base;
+  console.log(mode);
+  var post = request.body;
+  console.log(post);
+
+  if ("word" == mode) {
+    db.query(
+      `
+      UPDATE WORD 
+      SET
+        NAME = ?, 
+        ABBREVIATION = ?, 
+        FULLNAME = ?, 
+        SORTATION = ?, 
+        DEFINITION = ?, 
+        WRITEDATE = now()
+      WHERE
+        SEQ = ?`, 
+      [post.wordName, post.wordAbbreviation, post.wordFullName, post.wordSortation, post.wordDefinition, post.wordSeq],
+      function (error, result) {
+        if(error) {
+          next(error);
+        }
+  
+        db.query(
+          `
+          INSERT INTO WORDHISTORY (WORDSEQ, NAME, ABBREVIATION, FULLNAME, SORTATION, DEFINITION, WRITEID, WRITEDATE, SYSTEM)
+          VALUES(?, ?, ?, ?, ?, ?, ?, now(), '0')`, 
+          [post.wordSeq, post.wordName, post.wordAbbreviation, post.wordFullName, post.wordSortation, post.wordDefinition, post.id],
           function (error, result) {
             if(error) {
               next(error);
@@ -100,92 +180,48 @@ app.post('/create/:mode', function (request, response, next) {
     );
   } else if ("domain" == mode) {
 
-    db.query(
-      `
-      INSERT INTO DOMAIN (GROUPNAME, NAME, DATATYPE, DATALENGTH, DATADECIMAL, ABBREVIATION, FULLNAME, DEFINITION, WRITEDATE, SYSTEM)
-      VALUES(?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'SUPER')`, 
-      [post.groupName, post.name, post.dataType, post.dataLength, post.dataDecimal, post.abbreviation, post.fullName, post.definition],
-      function (error, result) {
-        if(error) {
-          next(error);
-        }
-        
-        db.query(
-          `
-          INSERT INTO DOMAINHISTORY (DOMAINSEQ, GROUPNAME, NAME, DATATYPE, DATALENGTH, DATADECIMAL, ABBREVIATION, FULLNAME, DEFINITION, WRITEID, WRITEDATE, SYSTEM)
-          VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'SUPER')`, 
-          [result.insertId, post.groupName, post.name, post.dataType, post.dataLength, post.dataDecimal, post.abbreviation, post.fullName, post.definition, post.id],
-          function (error, result) {
-            if(error) {
-              next(error);
-            }
-            response.redirect(`/domain`);
-          }
-        );
-      }
-    );
-    console.log(post);
-    response.redirect(`/domain`);
   } 
 
-});
-
-/**
- * 수정
- */
-app.post('/updateWord', function (request, response, next) {
-  var post = request.body;
-  console.log(post);
-  db.query(
-    `
-    UPDATE WORD 
-    SET
-      NAME = ?, 
-      ABBREVIATION = ?, 
-      FULLNAME = ?, 
-      SORTATION = ?, 
-      DEFINITION = ?, 
-      WRITEDATE = now()
-    WHERE
-      SEQ = ?`, 
-    [post.name, post.abbreviation, post.fullName, post.sortation, post.definition, post.seq],
-    function (error, result) {
-      if(error) {
-        next(error);
-      }
-
-      db.query(
-        `
-        INSERT INTO WORDHISTORY (WORDSEQ, NAME, ABBREVIATION, FULLNAME, SORTATION, DEFINITION, WRITEID, WRITEDATE, SYSTEM)
-        VALUES(?, ?, ?, ?, ?, ?, ?, now(), 'SUPER')`, 
-        [post.seq, post.name, post.abbreviation, post.fullName, post.sortation, post.definition, post.id],
-        function (error, result) {
-          if(error) {
-            next(error);
-          }
-          response.redirect(`/word`);
-        }
-      );
-    }
-  );
+  
 });
 
 /**
  * 삭제
+ * mode : word, domain, attribute, entity
  */
-app.get('/deleteWord/:seq', function (request, response, next) {
+
+app.get('/delete/:mode/:seq', function (request, response, next) {
   var seq = path.parse(request.params.seq).base;
-  db.query('DELETE FROM WORDHISTORY WHERE WORDSEQ=?', [seq], function(error, result) {
-    if (error) {
-      next(error);
-    } 
-    db.query('DELETE FROM WORD WHERE SEQ=?', [seq], function(error, result) {
+  var mode = path.parse(request.params.mode).base;
+
+  if ('word' == mode) {
+    db.query('DELETE FROM WORDHISTORY WHERE WORDSEQ=?', [seq], function(error, result) {
       if (error) {
         next(error);
       } 
-      response.redirect(`/word`);
+      db.query('DELETE FROM WORD WHERE SEQ=?', [seq], function(error, result) {
+        if (error) {
+          next(error);
+        } 
+        response.redirect(`/word`);
+      });
     });
-  });
+  } else if ('domain' == mode) {
+    db.query('DELETE FROM DOMAINHISTORY WHERE DOMAINSEQ=?', [seq], function(error, result) {
+      if (error) {
+        next(error);
+      } 
+      db.query('DELETE FROM DOMAIN WHERE SEQ=?', [seq], function(error, result) {
+        if (error) {
+          next(error);
+        } 
+        response.redirect(`/domain`);
+      });
+    });
+  } else {
+    next(error);
+  }
+
 });
 
 /**
@@ -195,6 +231,15 @@ app.post('/keywordSearch', function (request, response, next) {
   var post = request.body;
   var condition = 'NAME';
   var keyword = post.keyword;
+  var mode = post.mode;
+  var whereMode = '';
+  if ('equal' == mode) {
+    whereMode = '=';
+  } else {
+    whereMode = 'LIKE';
+    keyword = '%'+keyword+'%';
+  }
+
   if ("name" == post.condition) {
     condition = "NAME";
   } else if ("abbreviation" == post.condition) {
@@ -203,8 +248,6 @@ app.post('/keywordSearch', function (request, response, next) {
     condition = "FULLNAME";
   } 
 
-  //console.log('condition : '+condition);
-  //console.log('keyword : '+keyword);
   db.query(
     `SELECT 
       SEQ, 
@@ -217,8 +260,8 @@ app.post('/keywordSearch', function (request, response, next) {
     FROM 
       WORD
     WHERE
-      ${condition} LIKE ?
-      `, ['%'+keyword+'%'], function (error, words) {
+      upper(${condition}) ${whereMode} upper(?)
+      `, [keyword], function (error, words) {
       if (error) {
         next(error);
       }
@@ -228,40 +271,73 @@ app.post('/keywordSearch', function (request, response, next) {
 
 /**
  * 이력 조회
+ * mode : word, domain, attribute, entity
  */
 app.get('/getHistory/:mode/:seq', function (request, response, next) {
   var mode = path.parse(request.params.mode).base;
   var seq = path.parse(request.params.seq).base;
-
-  db.query(
-    `SELECT 
-      SEQ,
-      WORDSEQ, 
-      NAME, 
-      ABBREVIATION, 
-      FULLNAME, 
-      SORTATION, 
-      IFNULL(DEFINITION, '') DEFINITION, 
-      WRITEID,
-      DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
-    FROM 
-      WORDHISTORY
-    WHERE 
-      WORDSEQ = ?
-    ORDER BY SEQ DESC`, [seq], function (error, historyList) {
-      if (error) {
-        next(error);
-      }
-      response.json(historyList);
+  if ("word" == mode) {
+    db.query(
+      `SELECT 
+        SEQ,
+        WORDSEQ, 
+        NAME, 
+        ABBREVIATION, 
+        FULLNAME, 
+        SORTATION, 
+        IFNULL(DEFINITION, '') DEFINITION, 
+        WRITEID,
+        DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
+      FROM 
+        WORDHISTORY
+      WHERE 
+        WORDSEQ = ?
+      ORDER BY SEQ DESC`, [seq], function (error, historyList) {
+        if (error) {
+          next(error);
+        }
+        response.json(historyList);
+      });
+  } else if ("domain" == mode) {
+    db.query(
+      `SELECT 
+        SEQ, 
+        GROUPNAME, 
+        NAME, 
+        DATATYPE, 
+        DATALENGTH, 
+        DATADECIMAL,
+        ABBREVIATION,
+        FULLNAME,
+        IFNULL(DEFINITION, '') DEFINITION, 
+        WRITEID,
+        DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
+      FROM 
+        DOMAINHISTORY
+      WHERE 
+        DOMAINSEQ = ?
+      ORDER BY SEQ DESC`, [seq], function (error, historyList) {
+        if (error) {
+          next(error);
+        }
+        response.json(historyList);
     });
+  } 
 });
 
-app.use(function(req, res, next) {
-  res.status(404).send('Sorry cant find that!');
+/**
+ * 404 에러 발생시
+ */
+app.use(function(request, response, next) {
+  response.status(404).send('Sorry cant find that!');
 });
 
-app.use(function (err, req, res, next) {
-  console.error(err.stack)
-  res.status(500).send('Something broke!')
+/**
+ * 500 에러 발생시
+ */
+app.use(function (error, request, response, next) {
+  console.error(error.stack);
+  response.status(500).send('Something broke!');
 });
+
 app.listen(3000);
