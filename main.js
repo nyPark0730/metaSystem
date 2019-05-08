@@ -4,11 +4,18 @@ var path = require('path');
 var db = require('./lib/db.js');
 var template = require('./lib/template.js');
 var bodyParser = require('body-parser');
+var excel = require('excel4node');
+
+
 app.use(express.static(path.join(__dirname, 'www')));
 app.use('/bootstrap', express.static('bootstrap-3.3.2'));
 app.use('/js', express.static(path.join(__dirname,  'bootstrap-3.3.2', 'dist', 'js')));
 app.use('/css', express.static(path.join(__dirname, 'bootstrap-3.3.2', 'dist', 'css')));
+app.use('/commonJs', express.static(path.join(__dirname, 'views', 'js')));
+app.use('/nodeModules', express.static(path.join(__dirname, 'node_modules')));
 app.use(bodyParser.urlencoded({ extended: false }));
+app.set('view engine', 'ejs');
+app.set('views', './views');
 
 /**
  * root 접근 → 표준단어를 default 페이지로 설정
@@ -17,15 +24,61 @@ app.get('/', function (request, response) {
   response.redirect('/word');
 });
 
+
 /**
  * 메뉴별 접근
- * mode : word, domain, attribute, entity
+ * mode : word, domain
  */ 
-app.get('/:mode', function (request, response, next) {
+app.get('/:mode/:pageNum', function (request, response, next) {
   var mode = path.parse(request.params.mode).base;
+  var page = path.parse(request.params.pageNum).base;
 
   if ("word" == mode) {
+
     db.query(
+      `SELECT COUNT(*) COUNT FROM WORD`, function (error, result) {
+          if (error) {
+            next(error);
+          }
+          var totalCount = result[0]['COUNT'];
+          var listCount = 2;
+          var limitStart = (page-1) * listCount;
+
+          db.query(
+            `SELECT 
+              SEQ, 
+              NAME, 
+              ABBREVIATION, 
+              FULLNAME, 
+              SORTATION, 
+              IFNULL(DEFINITION, '') DEFINITION, 
+              DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
+            FROM 
+              WORD
+            LIMIT ?, ?`, [limitStart, listCount],  function (error, list) {
+                if (error) {
+                  next(error);
+                }
+                //var html = template.theme("word", list);
+                console.log(list[0]);
+                response.render('word.ejs', {list : JSON.stringify(list), totalCount : totalCount, page:page} );
+            }
+          );
+          //response.send('test');
+      }
+    );
+
+
+
+
+/*
+    
+
+*/
+
+
+
+    /*db.query(
       `SELECT 
         SEQ, 
         NAME, 
@@ -39,10 +92,10 @@ app.get('/:mode', function (request, response, next) {
           if (error) {
             next(error);
           }
-          var html = template.theme("word", list);
-          response.send(html);
+          //var html = template.theme("word", list);
+          response.render('word.ejs', {list : JSON.stringify(list)});
       }
-    );
+    );*/
   } else if ("domain" == mode) {
     db.query(
       `SELECT 
@@ -61,23 +114,24 @@ app.get('/:mode', function (request, response, next) {
           if (error) {
             next(error);
           }
-          var html = template.theme("domain", list);
-          response.send(html);
+          //var html = template.theme("domain", list);
+          response.render('domain.ejs', {list : JSON.stringify(list)});
+          //response.send(html);
       }
     );
   } else {
-    next();
+    response.render('index.ejs');
+    //next();
     //response.send("Comming Soon..");
   }
 });
 
 /**
  * 추가
- * mode : word, domain, attribute, entity
+ * mode : word, domain
  */
 app.post('/create/:mode', function (request, response, next) {
   var mode = path.parse(request.params.mode).base;
-  console.log(mode);
   var post = request.body;
 
   if ("word" == mode) {
@@ -130,20 +184,17 @@ app.post('/create/:mode', function (request, response, next) {
         );
       }
     );
-    response.redirect(`/domain`);
   } 
 
 });
 
 /**
  * 수정
- * mode : word, domain, attribute, entity
+ * mode : word, domain
  */
 app.post('/update/:mode', function (request, response, next) {
   var mode = path.parse(request.params.mode).base;
-  console.log(mode);
   var post = request.body;
-  console.log(post);
 
   if ("word" == mode) {
     db.query(
@@ -179,7 +230,40 @@ app.post('/update/:mode', function (request, response, next) {
       }
     );
   } else if ("domain" == mode) {
-
+    db.query(
+      `
+      UPDATE DOMAIN 
+      SET
+        GROUPNAME = ?,
+        NAME = ?, 
+        DATATYPE = ?,
+        DATALENGTH = ?,
+        DATADECIMAL = ?,
+        ABBREVIATION = ?, 
+        FULLNAME = ?, 
+        DEFINITION = ?, 
+        WRITEDATE = now()
+      WHERE
+        SEQ = ?`, 
+      [post.domainGroupName, post.domainName, post.domainDataType, post.domainDataLength, post.domainDataDecimal, post.domainAbbreviation, post.domainFullName, post.domainDefinition, post.domainSeq],
+      function (error, result) {
+        if(error) {
+          next(error);
+        }
+        db.query(
+          `
+          INSERT INTO DOMAINHISTORY (DOMAINSEQ, GROUPNAME, NAME, DATATYPE, DATALENGTH, DATADECIMAL, ABBREVIATION, FULLNAME, DEFINITION, WRITEID, WRITEDATE, SYSTEM)
+          VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), '0')`, 
+          [post.domainSeq, post.domainGroupName, post.domainName, post.domainDataType, post.domainDataLength, post.domainDataDecimal, post.domainAbbreviation, post.domainFullName, post.domainDefinition, post.id],
+          function (error, result) {
+            if(error) {
+              next(error);
+            }
+            response.redirect(`/domain`);
+          }
+        );
+      }
+    );
   } 
 
   
@@ -187,7 +271,7 @@ app.post('/update/:mode', function (request, response, next) {
 
 /**
  * 삭제
- * mode : word, domain, attribute, entity
+ * mode : word, domain
  */
 
 app.get('/delete/:mode/:seq', function (request, response, next) {
@@ -227,18 +311,18 @@ app.get('/delete/:mode/:seq', function (request, response, next) {
 /**
  * 키워드 검색
  */
-app.post('/keywordSearch', function (request, response, next) {
+app.post('/keywordSearch/:mode', function (request, response, next) {
   var post = request.body;
   var condition = 'NAME';
   var keyword = post.keyword;
-  var mode = post.mode;
-  var whereMode = '';
-  if ('equal' == mode) {
+  var whereMode = post.whereMode;
+  if ('equal' == whereMode) {
     whereMode = '=';
   } else {
     whereMode = 'LIKE';
     keyword = '%'+keyword+'%';
   }
+  var mode = path.parse(request.params.mode).base;
 
   if ("name" == post.condition) {
     condition = "NAME";
@@ -248,30 +332,55 @@ app.post('/keywordSearch', function (request, response, next) {
     condition = "FULLNAME";
   } 
 
-  db.query(
-    `SELECT 
-      SEQ, 
-      NAME, 
-      ABBREVIATION, 
-      FULLNAME, 
-      SORTATION, 
-      IFNULL(DEFINITION, '') DEFINITION, 
-      DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
-    FROM 
-      WORD
-    WHERE
-      upper(${condition}) ${whereMode} upper(?)
-      `, [keyword], function (error, words) {
-      if (error) {
-        next(error);
-      }
-      response.json(words);
-    });
+  if ('word' == mode) {
+    db.query(
+      `SELECT 
+        SEQ, 
+        NAME, 
+        ABBREVIATION, 
+        FULLNAME, 
+        SORTATION, 
+        IFNULL(DEFINITION, '') DEFINITION, 
+        DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
+      FROM 
+        WORD
+      WHERE
+        upper(${condition}) ${whereMode} upper(?)
+        `, [keyword], function (error, list) {
+        if (error) {
+          next(error);
+        }
+        response.json(list);
+      });
+  } else if ('domain' == mode) {
+    db.query(
+      `SELECT 
+        SEQ, 
+        GROUPNAME, 
+        NAME, 
+        DATATYPE, 
+        DATALENGTH, 
+        DATADECIMAL,
+        ABBREVIATION,
+        FULLNAME,
+        IFNULL(DEFINITION, '') DEFINITION, 
+        DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
+      FROM 
+        DOMAIN
+      WHERE
+        upper(${condition}) ${whereMode} upper(?)
+        `, [keyword], function (error, list) {
+        if (error) {
+          next(error);
+        }
+        response.json(list);
+      });
+  }
 });
 
 /**
  * 이력 조회
- * mode : word, domain, attribute, entity
+ * mode : word, domain
  */
 app.get('/getHistory/:mode/:seq', function (request, response, next) {
   var mode = path.parse(request.params.mode).base;
@@ -324,6 +433,56 @@ app.get('/getHistory/:mode/:seq', function (request, response, next) {
     });
   } 
 });
+
+/**
+ * 엑셀 다운로드
+ */
+app.get('/excelDownload/:mode/', function (request, response, next) {
+  var mode = path.parse(request.params.mode).base;
+  if ('word' == mode) {
+    db.query(
+      `SELECT 
+        SEQ, 
+        NAME, 
+        ABBREVIATION, 
+        FULLNAME, 
+        SORTATION, 
+        IFNULL(DEFINITION, '') DEFINITION, 
+        DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
+      FROM 
+        WORD`, function (error, list) {
+          if (error) {
+            next(error);
+          }
+         
+          var wb = new excel.Workbook();
+          var ws = wb.addWorksheet('표준단어');
+          
+          ws.cell(1, 1).string('순번');
+          ws.cell(1, 2).string('단어명');
+          ws.cell(1, 3).string('영문약어명');
+          ws.cell(1, 4).string('영문명');
+          ws.cell(1, 5).string('구분');
+          ws.cell(1, 6).string('정의');
+          ws.cell(1, 7).string('작성일');
+
+          list.forEach(function(value, index){
+            ws.cell(index+2, 1).number(index+1);
+            ws.cell(index+2, 2).string(value['NAME']);
+            ws.cell(index+2, 3).string(value['ABBREVIATION']);
+            ws.cell(index+2, 4).string(value['FULLNAME']);
+            ws.cell(index+2, 5).string(value['SORTATION']);
+            ws.cell(index+2, 6).string(value['DEFINITION']);
+            ws.cell(index+2, 7).string(value['WRITEDATE']);
+          });
+          wb.write('word.xlsx', response);
+
+      }
+    );
+  }
+
+});
+
 
 /**
  * 404 에러 발생시
