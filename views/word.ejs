@@ -1,0 +1,281 @@
+<!doctype html>
+    <html lang="en">
+      <head>
+        <% include ./header.ejs%>
+      </head>
+      <body>
+        <% include ./menu.ejs %>
+        <div class="container" style="margin-top:60px;">
+          <form class="form-inline pull-right" style="margin-bottom:10px;">
+            <div class="form-group">
+              <select class="form-control" id="searchCondition">
+                <option value="name">단어명</option>
+                <option value="abbreviation">영문약어명</option>
+                <option value="fullName">영문명</option>
+              </select>
+              <input type="text" id="keyword" placeholder="키워드" class="form-control">
+              <button type="button" class="btn btn-success" id="searchBtn">검색</button>
+            </div>
+          </form>
+
+          <table class="table table-bordered table-hover" id="listTbl">
+            <tr>
+              <th class="text-center">순번</th>
+              <th class="text-center">단어명</th>
+              <th class="text-center">영문약어명</th>
+              <th class="text-center">영문명</th>
+              <th class="text-center">구분</th>
+              <th class="text-center">정의</th>
+              <th class="text-center">작성일</th>
+              <th class="text-center">삭제/이력관리</th>
+            </tr>
+            <% 
+            var data = JSON.parse(list);
+            var num = 1;
+            data.forEach(function(value){ %>
+            <tr>
+              <td class="text-center" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=num %></td>
+              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['NAME'] %></td>
+              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['ABBREVIATION'] %></td>
+              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['FULLNAME'] %></td>
+              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['SORTATION'] %></td>
+              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['DEFINITION'] %></td>
+              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['WRITEDATE'] %></td>
+              <td class="text-center"><button type="button" class="btn btn-danger" onclick="deleteProcess('word', <%=value['SEQ']%>);">삭제</button>&nbsp;<button type="button" class="btn btn-default" onclick="getHistory('word', <%=value['SEQ']%>);">이력</button></th>
+            </tr>
+              <% num++; }) %>
+          </table>
+          <div id="paging" class="text-center"></div>
+
+          <!-- Button trigger modal -->
+          <button type="button" id="totalExcelDownBtn" class="btn btn-default pull-right" style="margin-right:5px;">전체 엑셀 다운로드</button>
+          <button type="button" class="btn btn-primary pull-right" data-toggle="modal" id="addBtn" style="margin-right:5px;">추가</button>
+          <!-- Modal -->
+          <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title" id="myModalLabel">추가</h4>
+                </div>
+                <form class="form-horizontal" id="executeForm" action="/create" method="post">
+                  <div class="modal-body">
+                    <input type="hidden" id="wordSeq" name="wordSeq" />
+                    <div class="form-group">
+                      <label class="col-sm-2 control-label">단어명</label>
+                      <div class="col-sm-10"><input type="text" class="form-control" id="wordName" name="wordName" placeholder="단어"></div>
+                    </div>
+                    <div class="form-group">
+                      <label for="inputEmail3" class="col-sm-2 control-label">영문약어명</label>
+                      <div class="col-sm-10"><input type="text" class="form-control" id="wordAbbreviation" name="wordAbbreviation" placeholder="영문약어명"></div>
+                    </div>
+                    <div class="form-group">
+                      <label for="inputEmail3" class="col-sm-2 control-label">영문명</label>
+                      <div class="col-sm-10"><input type="text" class="form-control" id="wordFullName" name="wordFullName" placeholder="영문명"></div>
+                    </div>
+                    <div class="form-group">
+                      <label for="inputEmail3" class="col-sm-2 control-label">구분</label>
+                      <div class="col-sm-10">
+                        <select class="form-control" id="wordSortation" name="wordSortation">
+                          <option value="수식어">수식어</option>
+                          <option value="도메인">도메인</option>
+                        </select>
+                      </div>
+                      </div>
+                      <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-2 control-label">정의</label>
+                        <div class="col-sm-10"><input type="text" class="form-control" id="wordDefinition" name="wordDefinition" placeholder="정의"></div>
+                      </div>
+                  </div>
+                  <div class="modal-footer">
+                    <label for="ID" class="col-sm-2 control-label">ID</label>
+                    <div class="col-sm-5"><input type="text" class=" form-control" id="id" name="id" placeholder="ID"></div>
+                    <button type="button" class="btn btn-primary" id="executeBtn">추가</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+          <!-- Modal -->
+          <div class="modal fade" id="historyModal" tabindex="-1" role="dialog" aria-labelledby="historyModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                  <h4 class="modal-title" id="historyModalLabel"></h4>
+                </div>
+                <div class="modal-body">
+                  <table class="table table-bordered table-hover" id="historyTbl">
+                  </table>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /.container -->
+        <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
+        <script src="/js/bootstrap.min.js"></script>
+        <script src="/commonJs/common.js"></script>
+        <script src="/commonJs/bootpag.js"></script>
+    
+        <script>
+        var totalCount = <%=totalCount%>;    // 총 데이터 수
+        var listCount = 2;    // 한 페이지에 나타낼 데이터 수
+        var pageCount = 5;        // 한 화면에 나타낼 페이지 수
+        
+        $(document).ready(function () {
+           paging(totalCount, listCount, pageCount, 1);
+          // 전체 엑셀 다운로드 버튼 클릭
+          $("#totalExcelDownBtn").click(function() {
+            location.replace('/excelDownload/word'); 
+          });
+
+          function paging(totalCount, listCount, pageCount, currentPage){
+            
+            var totalPage = Math.ceil(totalCount/listCount);    // 총 페이지 수
+            var pageGroup = Math.ceil(currentPage/pageCount);    // 페이지 그룹
+            
+            console.log("totalPage : " + totalPage);
+            console.log("pageGroup : " + pageGroup);
+            console.log("currentPage : " + currentPage);
+            
+            var last = pageGroup * pageCount;    // 화면에 보여질 마지막 페이지 번호
+            if(last > totalPage)
+                last = totalPage;
+                
+            var first = last - (pageCount-1);    // 화면에 보여질 첫번째 페이지 번호
+            var next = last+1;
+            var prev = first-1;
+            
+            console.log("last : " + last);
+            console.log("first : " + first);
+            console.log("next : " + next);
+            console.log("prev : " + prev);
+
+            var $pingingView = $("#paging");
+            
+            var html = "";
+            
+            if(prev > 0)
+                html += "<a href=# id='prev'><</a> ";
+            
+            for(var i=first; i <= last; i++){
+                html += "<a href='#' id=" + i + ">" + i + "</a> ";
+            }
+            
+            if(last < totalPage)
+                html += "<a href=# id='next'>></a>";
+            
+            $("#paging").html(html);    // 페이지 목록 생성
+            $("#paging a").css("color", "black");
+            $("#paging a#" + currentPage).css({"text-decoration":"none", 
+                                              "color":"red", 
+                                              "font-weight":"bold"});    // 현재 페이지 표시
+                                              
+            $("#paging a").click(function(){
+                
+                var $item = $(this);
+                var $id = $item.attr("id");
+                var selectedPage = $item.text();
+                
+                if($id == "next")    selectedPage = next;
+                if($id == "prev")    selectedPage = prev;
+                
+                paging(totalCount, listCount, pageCount, selectedPage);
+            });
+                                            
+          }
+          /*$('#page-selection').bootpag({
+            total: <%=totalCount%>,         
+            page: <%=page%>,          
+            maxVisible: 5,    
+            leaps: true,
+            firstLastUse: true,
+            first: '←',
+            last: '→',
+            wrapClass: 'pagination',
+            activeClass: 'active',
+            disabledClass: 'disabled',
+            nextClass: 'next',
+            prevClass: 'prev',
+            lastClass: 'last',
+            firstClass: 'first'
+        }).on("page", function(event, num){
+          location.replace('/word/'+num);
+            //$("#content").html("Page " + num); // or some ajax content loading...
+        });*/
+
+
+
+           // 추가 버튼 클릭
+          $("#addBtn").click(function() {
+            $("#wordName").val("");
+            $("#wordAbbreviation").val("");
+            $("#wordFullName").val("");
+            $("#wordSortation").val("수식어");
+            $("#wordDefinition").val("");
+            $("#myModalLabel").text("추가");
+            $("#executeBtn").text("추가");
+            $("#executeForm").attr("action", "/create/"+pathName);
+            $('#myModal').modal('show'); 
+          });
+
+          $("#searchBtn").click(function () {
+            var data = new Object();
+            data.condition =  $("#searchCondition").val();
+            data.keyword = $("#keyword").val();
+
+            $.ajax({
+              url:"/keywordSearch/word",
+              type:'post',
+              data: data,
+              dataType:'json',
+              success:function(data){
+                var list = '<tr>'
+                  +'<th class="text-center">순번</td>'
+                  +'<th class="text-center">단어명</td>'
+                  +'<th class="text-center">영문약어명</td>'
+                  +'<th class="text-center">영문명</td>'
+                  +'<th class="text-center">구분</td>'
+                  +'<th class="text-center">정의</td>'
+                  +'<th class="text-center">작성일</td>'
+                  +'<th class="text-center">삭제/이력관리</th>'
+                +'<tr>';
+                var number = 1;
+                var mode = "'word'";
+                $.each(data, function(key, value){
+                  list += '<tr>';
+                  list += '<td class="text-center">'+ number + '</td>';
+                  list += '<td>'+ value.NAME + '</td>';
+                  list += '<td>'+ value.ABBREVIATION + '</td>';
+                  list += '<td>'+ value.FULLNAME + '</td>';
+                  list += '<td class="text-center">'+ value.SORTATION + '</td>';
+                  list += '<td>'+ value.DEFINITION + '</td>';
+                  list += '<td class="text-center">'+ value.WRITEDATE + '</td>';
+                  list += '<td class="text-center"><button type="button" class="btn btn-danger" onclick="deleteProcess('+mode+','+  value.SEQ + ');">삭제</button>&nbsp;<button type="button" class="btn btn-default" onclick="getHistory('+mode+','+  value.SEQ + ');">이력</button></td>';
+                  list += '</tr>';
+                  number++;
+                });
+                $("#listTbl").html(list);
+              }
+            });
+          });
+        });
+
+        function getInfoForUpdate(obj) {
+          $("#wordSeq").val(obj['SEQ']);
+          $("#wordName").val(obj['NAME']);
+          $("#wordAbbreviation").val(obj['ABBREVIATION']);
+          $("#wordFullName").val(obj['FULLNAME']);
+          $("#wordSortation").val(obj['SORTATION']);
+          $("#wordDefinition").val(obj['DEFINITION']);
+          $("#myModalLabel").text("수정");
+          $("#executeBtn").text("수정");
+          $("#executeForm").attr("action", "/update/word");
+          $('#myModal').modal('show'); 
+        }
+        </script>
+      </body>
+    </html>
