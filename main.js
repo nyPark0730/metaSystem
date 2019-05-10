@@ -26,6 +26,54 @@ app.get('/', function (request, response) {
 
 
 /**
+ * 엑셀 다운로드
+ */
+app.get('/excelDownload/:mode/', function (request, response, next) {
+  var mode = path.parse(request.params.mode).base;
+  if ('word' == mode) {
+    db.query(
+      `SELECT 
+        SEQ, 
+        NAME, 
+        ABBREVIATION, 
+        FULLNAME, 
+        SORTATION, 
+        IFNULL(DEFINITION, '') DEFINITION, 
+        DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
+      FROM 
+        WORD`, function (error, list) {
+          if (error) {
+            next(error);
+          }
+         
+          var wb = new excel.Workbook();
+          var ws = wb.addWorksheet('표준단어');
+          
+          ws.cell(1, 1).string('순번');
+          ws.cell(1, 2).string('단어명');
+          ws.cell(1, 3).string('영문약어명');
+          ws.cell(1, 4).string('영문명');
+          ws.cell(1, 5).string('구분');
+          ws.cell(1, 6).string('정의');
+          ws.cell(1, 7).string('작성일');
+
+          list.forEach(function(value, index){
+            ws.cell(index+2, 1).number(index+1);
+            ws.cell(index+2, 2).string(value['NAME']);
+            ws.cell(index+2, 3).string(value['ABBREVIATION']);
+            ws.cell(index+2, 4).string(value['FULLNAME']);
+            ws.cell(index+2, 5).string(value['SORTATION']);
+            ws.cell(index+2, 6).string(value['DEFINITION']);
+            ws.cell(index+2, 7).string(value['WRITEDATE']);
+          });
+          wb.write('word.xlsx', response);
+
+      }
+    );
+  }
+
+});
+/**
  * 메뉴별 접근
  * mode : word, domain
  */ 
@@ -38,10 +86,13 @@ app.get('/:mode/:pageNum', function (request, response, next) {
     db.query(
       `SELECT COUNT(*) COUNT FROM WORD`, function (error, result) {
           if (error) {
+            console.log(error);
             next(error);
           }
+
+
           var totalCount = result[0]['COUNT'];
-          var listCount = 2;
+          var listCount = 5;
           var limitStart = (page-1) * listCount;
 
           db.query(
@@ -60,8 +111,7 @@ app.get('/:mode/:pageNum', function (request, response, next) {
                   next(error);
                 }
                 //var html = template.theme("word", list);
-                console.log(list[0]);
-                response.render('word.ejs', {list : JSON.stringify(list), totalCount : totalCount, page:page} );
+                response.render('word.ejs', {list : JSON.stringify(list), totalCount : totalCount, currentPage:page} );
             }
           );
           //response.send('test');
@@ -435,60 +485,10 @@ app.get('/getHistory/:mode/:seq', function (request, response, next) {
 });
 
 /**
- * 엑셀 다운로드
- */
-app.get('/excelDownload/:mode/', function (request, response, next) {
-  var mode = path.parse(request.params.mode).base;
-  if ('word' == mode) {
-    db.query(
-      `SELECT 
-        SEQ, 
-        NAME, 
-        ABBREVIATION, 
-        FULLNAME, 
-        SORTATION, 
-        IFNULL(DEFINITION, '') DEFINITION, 
-        DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
-      FROM 
-        WORD`, function (error, list) {
-          if (error) {
-            next(error);
-          }
-         
-          var wb = new excel.Workbook();
-          var ws = wb.addWorksheet('표준단어');
-          
-          ws.cell(1, 1).string('순번');
-          ws.cell(1, 2).string('단어명');
-          ws.cell(1, 3).string('영문약어명');
-          ws.cell(1, 4).string('영문명');
-          ws.cell(1, 5).string('구분');
-          ws.cell(1, 6).string('정의');
-          ws.cell(1, 7).string('작성일');
-
-          list.forEach(function(value, index){
-            ws.cell(index+2, 1).number(index+1);
-            ws.cell(index+2, 2).string(value['NAME']);
-            ws.cell(index+2, 3).string(value['ABBREVIATION']);
-            ws.cell(index+2, 4).string(value['FULLNAME']);
-            ws.cell(index+2, 5).string(value['SORTATION']);
-            ws.cell(index+2, 6).string(value['DEFINITION']);
-            ws.cell(index+2, 7).string(value['WRITEDATE']);
-          });
-          wb.write('word.xlsx', response);
-
-      }
-    );
-  }
-
-});
-
-
-/**
  * 404 에러 발생시
  */
 app.use(function(request, response, next) {
-  response.status(404).send('Sorry cant find that!');
+  response.status(404).send('404: Sorry cant find that!');
 });
 
 /**
@@ -496,7 +496,7 @@ app.use(function(request, response, next) {
  */
 app.use(function (error, request, response, next) {
   console.error(error.stack);
-  response.status(500).send('Something broke!');
+  response.status(500).send('500: Something broke!');
 });
 
 app.listen(3000);

@@ -19,6 +19,7 @@
           </form>
 
           <table class="table table-bordered table-hover" id="listTbl">
+            <thead>
             <tr>
               <th class="text-center">순번</th>
               <th class="text-center">단어명</th>
@@ -27,8 +28,10 @@
               <th class="text-center">구분</th>
               <th class="text-center">정의</th>
               <th class="text-center">작성일</th>
-              <th class="text-center">삭제/이력관리</th>
+              <th class="text-center" name="deleteAndHistory">삭제/이력관리</th>
             </tr>
+          </thead>
+          <tbody>
             <% 
             var data = JSON.parse(list);
             var num = 1;
@@ -44,10 +47,12 @@
               <td class="text-center"><button type="button" class="btn btn-danger" onclick="deleteProcess('word', <%=value['SEQ']%>);">삭제</button>&nbsp;<button type="button" class="btn btn-default" onclick="getHistory('word', <%=value['SEQ']%>);">이력</button></th>
             </tr>
               <% num++; }) %>
+            </tbody>
           </table>
           <div id="paging" class="text-center"></div>
 
           <!-- Button trigger modal -->
+          <button type="button" id="currentExcelDownBtn" class="btn btn-default pull-right" style="margin-right:5px;">현재 페이지 엑셀 다운로드</button>
           <button type="button" id="totalExcelDownBtn" class="btn btn-default pull-right" style="margin-right:5px;">전체 엑셀 다운로드</button>
           <button type="button" class="btn btn-primary pull-right" data-toggle="modal" id="addBtn" style="margin-right:5px;">추가</button>
           <!-- Modal -->
@@ -115,99 +120,22 @@
             </div>
           </div>
         </div><!-- /.container -->
-        <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
-        <script src="/js/bootstrap.min.js"></script>
-        <script src="/commonJs/common.js"></script>
-        <script src="/commonJs/bootpag.js"></script>
-    
+       
         <script>
         var totalCount = <%=totalCount%>;    // 총 데이터 수
-        var listCount = 2;    // 한 페이지에 나타낼 데이터 수
-        var pageCount = 5;        // 한 화면에 나타낼 페이지 수
+        var listCount = 5;    // 한 페이지에 나타낼 데이터 수
+        var pageCount = 3;        // 한 화면에 나타낼 페이지 수
         
         $(document).ready(function () {
-           paging(totalCount, listCount, pageCount, 1);
+           paging(totalCount, listCount, pageCount, <%=currentPage%>);
           // 전체 엑셀 다운로드 버튼 클릭
           $("#totalExcelDownBtn").click(function() {
             location.replace('/excelDownload/word'); 
           });
 
-          function paging(totalCount, listCount, pageCount, currentPage){
-            
-            var totalPage = Math.ceil(totalCount/listCount);    // 총 페이지 수
-            var pageGroup = Math.ceil(currentPage/pageCount);    // 페이지 그룹
-            
-            console.log("totalPage : " + totalPage);
-            console.log("pageGroup : " + pageGroup);
-            console.log("currentPage : " + currentPage);
-            
-            var last = pageGroup * pageCount;    // 화면에 보여질 마지막 페이지 번호
-            if(last > totalPage)
-                last = totalPage;
-                
-            var first = last - (pageCount-1);    // 화면에 보여질 첫번째 페이지 번호
-            var next = last+1;
-            var prev = first-1;
-            
-            console.log("last : " + last);
-            console.log("first : " + first);
-            console.log("next : " + next);
-            console.log("prev : " + prev);
-
-            var $pingingView = $("#paging");
-            
-            var html = "";
-            
-            if(prev > 0)
-                html += "<a href=# id='prev'><</a> ";
-            
-            for(var i=first; i <= last; i++){
-                html += "<a href='#' id=" + i + ">" + i + "</a> ";
-            }
-            
-            if(last < totalPage)
-                html += "<a href=# id='next'>></a>";
-            
-            $("#paging").html(html);    // 페이지 목록 생성
-            $("#paging a").css("color", "black");
-            $("#paging a#" + currentPage).css({"text-decoration":"none", 
-                                              "color":"red", 
-                                              "font-weight":"bold"});    // 현재 페이지 표시
-                                              
-            $("#paging a").click(function(){
-                
-                var $item = $(this);
-                var $id = $item.attr("id");
-                var selectedPage = $item.text();
-                
-                if($id == "next")    selectedPage = next;
-                if($id == "prev")    selectedPage = prev;
-                
-                paging(totalCount, listCount, pageCount, selectedPage);
-            });
-                                            
-          }
-          /*$('#page-selection').bootpag({
-            total: <%=totalCount%>,         
-            page: <%=page%>,          
-            maxVisible: 5,    
-            leaps: true,
-            firstLastUse: true,
-            first: '←',
-            last: '→',
-            wrapClass: 'pagination',
-            activeClass: 'active',
-            disabledClass: 'disabled',
-            nextClass: 'next',
-            prevClass: 'prev',
-            lastClass: 'last',
-            firstClass: 'first'
-        }).on("page", function(event, num){
-          location.replace('/word/'+num);
-            //$("#content").html("Page " + num); // or some ajax content loading...
-        });*/
-
-
+          $("#currentExcelDownBtn").click(function() {
+            $('#listTbl').tableExport({fileName:'word', type:'xlsx', ignoreColumn: [0, 2]});
+          });
 
            // 추가 버튼 클릭
           $("#addBtn").click(function() {
@@ -276,6 +204,52 @@
           $("#executeForm").attr("action", "/update/word");
           $('#myModal').modal('show'); 
         }
+
+        function paging(totalCount, listCount, pageCount, currentPage){
+            
+            var totalPage = Math.ceil(totalCount/listCount);    // 총 페이지 수
+            var pageGroup = Math.ceil(currentPage/pageCount);    // 페이지 그룹
+            
+            var last = pageGroup * pageCount;    // 화면에 보여질 마지막 페이지 번호
+            if(last > totalPage) {
+                last = totalPage;
+            }
+
+            var first = last - (pageCount-1);    // 화면에 보여질 첫번째 페이지 번호
+            var next = last+1;
+            var prev = first-1;
+            
+            /*
+            console.log("totalPage : " + totalPage);
+            console.log("pageGroup : " + pageGroup);
+            console.log("currentPage : " + currentPage);
+            console.log("last : " + last);
+            console.log("first : " + first);
+            console.log("next : " + next);
+            console.log("prev : " + prev);
+            */
+
+            var html = "<nav aria-label='Page navigation example'><ul class='pagination'>";
+
+            if(prev > 0) {
+              html += "<li class='page-item'><a class='page-link' href='/word/"+prev+"' id='prev'>Previous</a></li>";
+            }
+            
+            for(var i=first; i <= last; i++){
+                if (i==currentPage) {
+                  html += "<li class='page-item active'><a class='page-link' href='#'>" + i + "</a></li>";
+                } else {
+                  html += "<li class='page-item'><a class='page-link' href='/word/"+i+"' id=" + i + ">" + i + "</a></li>";
+                }
+            }
+            
+            if(last < totalPage) {
+              html += "<li class='page-item'><a class='page-link' href='/word/"+next+"' id='next'>Next</a></li>";
+            }
+            html += "</ul></nav>";
+             
+            $("#paging").html(html);    // 페이지 목록 생성
+          }
         </script>
       </body>
     </html>
