@@ -82,15 +82,11 @@ app.get('/:mode/:pageNum', function (request, response, next) {
   var page = path.parse(request.params.pageNum).base;
 
   if ("word" == mode) {
-
     db.query(
       `SELECT COUNT(*) COUNT FROM WORD`, function (error, result) {
           if (error) {
-            console.log(error);
             next(error);
           }
-
-
           var totalCount = result[0]['COUNT'];
           var listCount = 5;
           var limitStart = (page-1) * listCount;
@@ -111,64 +107,48 @@ app.get('/:mode/:pageNum', function (request, response, next) {
                   next(error);
                 }
                 //var html = template.theme("word", list);
-                response.render('word.ejs', {list : JSON.stringify(list), totalCount : totalCount, currentPage:page} );
+                response.render('word.ejs', {list : JSON.stringify(list), totalCount : totalCount, currentPage : page, mode : mode});
             }
           );
           //response.send('test');
       }
     );
-
-
-
-
-/*
-    
-
-*/
-
-
-
-    /*db.query(
-      `SELECT 
-        SEQ, 
-        NAME, 
-        ABBREVIATION, 
-        FULLNAME, 
-        SORTATION, 
-        IFNULL(DEFINITION, '') DEFINITION, 
-        DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
-      FROM 
-        WORD`, function (error, list) {
-          if (error) {
-            next(error);
-          }
-          //var html = template.theme("word", list);
-          response.render('word.ejs', {list : JSON.stringify(list)});
-      }
-    );*/
   } else if ("domain" == mode) {
+
     db.query(
-      `SELECT 
-        SEQ, 
-        GROUPNAME, 
-        NAME, 
-        DATATYPE, 
-        DATALENGTH, 
-        DATADECIMAL,
-        ABBREVIATION,
-        FULLNAME,
-        IFNULL(DEFINITION, '') DEFINITION, 
-        DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
-      FROM 
-        DOMAIN`, function (error, list) {
+      `SELECT COUNT(*) COUNT FROM DOMAIN`, function (error, result) {
           if (error) {
             next(error);
           }
-          //var html = template.theme("domain", list);
-          response.render('domain.ejs', {list : JSON.stringify(list)});
-          //response.send(html);
+          var totalCount = result[0]['COUNT'];
+          var listCount = 5;
+          var limitStart = (page-1) * listCount;
+
+          db.query(
+            `SELECT 
+            SEQ, 
+            GROUPNAME, 
+            NAME, 
+            DATATYPE, 
+            DATALENGTH, 
+            DATADECIMAL,
+            ABBREVIATION,
+            FULLNAME,
+            IFNULL(DEFINITION, '') DEFINITION, 
+            DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
+          FROM 
+            DOMAIN
+            LIMIT ?, ?`, [limitStart, listCount],  function (error, list) {
+                if (error) {
+                  next(error);
+                }
+                //var html = template.theme("word", list);
+                response.render('domain.ejs', {list : JSON.stringify(list), totalCount : totalCount, currentPage : page, mode : mode});
+            }
+          );
       }
     );
+
   } else {
     response.render('index.ejs');
     //next();

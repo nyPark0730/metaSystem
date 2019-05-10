@@ -18,6 +18,7 @@
             </div>
           </form>
 
+          <input type="text" value="<%=mode%>">
           <table class="table table-bordered table-hover" id="listTbl">
             <thead>
             <tr>
@@ -127,7 +128,7 @@
         var pageCount = 3;        // 한 화면에 나타낼 페이지 수
         
         $(document).ready(function () {
-           paging(totalCount, listCount, pageCount, <%=currentPage%>);
+           paging(totalCount, listCount, pageCount, <%=currentPage%>, 'word');
           // 전체 엑셀 다운로드 버튼 클릭
           $("#totalExcelDownBtn").click(function() {
             location.replace('/excelDownload/word'); 
@@ -204,52 +205,6 @@
           $("#executeForm").attr("action", "/update/word");
           $('#myModal').modal('show'); 
         }
-
-        function paging(totalCount, listCount, pageCount, currentPage){
-            
-            var totalPage = Math.ceil(totalCount/listCount);    // 총 페이지 수
-            var pageGroup = Math.ceil(currentPage/pageCount);    // 페이지 그룹
-            
-            var last = pageGroup * pageCount;    // 화면에 보여질 마지막 페이지 번호
-            if(last > totalPage) {
-                last = totalPage;
-            }
-
-            var first = last - (pageCount-1);    // 화면에 보여질 첫번째 페이지 번호
-            var next = last+1;
-            var prev = first-1;
-            
-            /*
-            console.log("totalPage : " + totalPage);
-            console.log("pageGroup : " + pageGroup);
-            console.log("currentPage : " + currentPage);
-            console.log("last : " + last);
-            console.log("first : " + first);
-            console.log("next : " + next);
-            console.log("prev : " + prev);
-            */
-
-            var html = "<nav aria-label='Page navigation example'><ul class='pagination'>";
-
-            if(prev > 0) {
-              html += "<li class='page-item'><a class='page-link' href='/word/"+prev+"' id='prev'>Previous</a></li>";
-            }
-            
-            for(var i=first; i <= last; i++){
-                if (i==currentPage) {
-                  html += "<li class='page-item active'><a class='page-link' href='#'>" + i + "</a></li>";
-                } else {
-                  html += "<li class='page-item'><a class='page-link' href='/word/"+i+"' id=" + i + ">" + i + "</a></li>";
-                }
-            }
-            
-            if(last < totalPage) {
-              html += "<li class='page-item'><a class='page-link' href='/word/"+next+"' id='next'>Next</a></li>";
-            }
-            html += "</ul></nav>";
-             
-            $("#paging").html(html);    // 페이지 목록 생성
-          }
         </script>
       </body>
     </html>

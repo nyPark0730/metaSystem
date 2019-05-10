@@ -164,3 +164,49 @@ function getHistory(mode, seq) {
     }
   });
 }
+
+function paging(totalCount, listCount, pageCount, currentPage, mode){
+            
+  var totalPage = Math.ceil(totalCount/listCount);    // 총 페이지 수
+  var pageGroup = Math.ceil(currentPage/pageCount);    // 페이지 그룹
+  
+  var last = pageGroup * pageCount;    // 화면에 보여질 마지막 페이지 번호
+  if(last > totalPage) {
+      last = totalPage;
+  }
+
+  var first = last - (pageCount-1);    // 화면에 보여질 첫번째 페이지 번호
+  var next = last+1;
+  var prev = first-1;
+  
+  /*
+  console.log("totalPage : " + totalPage);
+  console.log("pageGroup : " + pageGroup);
+  console.log("currentPage : " + currentPage);
+  console.log("last : " + last);
+  console.log("first : " + first);
+  console.log("next : " + next);
+  console.log("prev : " + prev);
+  */
+
+  var html = "<nav aria-label='Page navigation example'><ul class='pagination'>";
+
+  if(prev > 0) {
+    html += "<li class='page-item'><a class='page-link' href='/"+mode+"/"+prev+"' id='prev'>Previous</a></li>";
+  }
+  
+  for(var i=first; i <= last; i++){
+      if (i==currentPage) {
+        html += "<li class='page-item active'><a class='page-link' href='#'>" + i + "</a></li>";
+      } else {
+        html += "<li class='page-item'><a class='page-link' href='/"+mode+"/"+i+"' id=" + i + ">" + i + "</a></li>";
+      }
+  }
+  
+  if(last < totalPage) {
+    html += "<li class='page-item'><a class='page-link' href='/"+mode+"/"+next+"' id='next'>Next</a></li>";
+  }
+  html += "</ul></nav>";
+   
+  $("#paging").html(html);    // 페이지 목록 생성
+}

@@ -47,8 +47,10 @@
             </tr>
               <% num++; }) %>
           </table>
+          <div id="paging" class="text-center"></div>
           <!-- Button trigger modal -->
-          <button type="button" class="btn btn-default pull-right" style="margin-right:5px;">엑셀 다운로드</button>
+          <button type="button" id="currentExcelDownBtn" class="btn btn-default pull-right" style="margin-right:5px;">현재 페이지 엑셀 다운로드</button>
+          <button type="button" id="totalExcelDownBtn" class="btn btn-default pull-right" style="margin-right:5px;">전체 엑셀 다운로드</button>
           <button type="button" class="btn btn-primary pull-right" data-toggle="modal" id="addBtn" style="margin-right:5px;">추가</button>
           <!-- Modal -->
           <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -125,6 +127,19 @@
         </div><!-- /.container -->
         <script>
         $(document).ready(function () {
+
+          var totalCount = <%=totalCount%>;    // 총 데이터 수
+          var listCount = 5;    // 한 페이지에 나타낼 데이터 수
+          var pageCount = 3;        // 한 화면에 나타낼 페이지 수
+          paging(totalCount, listCount, pageCount, <%=currentPage%>, 'domain');
+          // 전체 엑셀 다운로드 버튼 클릭
+          $("#totalExcelDownBtn").click(function() {
+            location.replace('/excelDownload/word'); 
+          });
+
+          $("#currentExcelDownBtn").click(function() {
+            $('#listTbl').tableExport({fileName:'domain', type:'xlsx', ignoreColumn: [0, 2]});
+          });
 
           $("#checkDomainNameBtn").click(function () {
             var data = new Object();
