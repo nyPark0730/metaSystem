@@ -32,20 +32,28 @@
             </tr>
             <% 
             var data = JSON.parse(list);
-            var num = 1;
-            data.forEach(function(value){ %>
-            <tr>
-              <td class="text-center" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=num %></td>
-              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['GROUPNAME'] %></td>
-              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['NAME'] %></td>
-              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['ABBREVIATION'] %></td>
-              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['FULLNAME'] %></td>
-              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['DATATYPE'] %>(<%=value['DATALENGTH'] %>, <%=value['DATADECIMAL'] %>)</td>
-              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['DEFINITION'] %></td>
-              <td class="text-center" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['WRITEDATE'] %></td>
-              <td class="text-center"><button type="button" class="btn btn-danger" onclick="deleteProcess('<%=mode%>', <%=value['SEQ']%>, <%=currentPage%>);">삭제</button>&nbsp;<button type="button" class="btn btn-default" onclick="getHistory('<%=mode%>', <%=value['SEQ']%>);">이력</button></th>
-            </tr>
-              <% num++; }) %>
+            if (data.length == 0) { %>
+              <tr>
+                <td colspan="9" class="text-center">조회된 데이터가 없습니다.</td>
+              </tr>
+            <% 
+            } else { 
+              var num = 1;
+              data.forEach(function(value){ %>
+              <tr>
+                <td class="text-center" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=num %></td>
+                <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['GROUPNAME'] %></td>
+                <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['NAME'] %></td>
+                <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['ABBREVIATION'] %></td>
+                <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['FULLNAME'] %></td>
+                <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['DATATYPE'] %>(<%=value['DATALENGTH'] %>, <%=value['DATADECIMAL'] %>)</td>
+                <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['DEFINITION'] %></td>
+                <td class="text-center" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['WRITEDATE'] %></td>
+                <td class="text-center"><button type="button" class="btn btn-danger" onclick="deleteProcess('<%=mode%>', <%=value['SEQ']%>, <%=currentPage%>);">삭제</button>&nbsp;<button type="button" class="btn btn-default" onclick="getHistory('<%=mode%>', <%=value['SEQ']%>);">이력</button></th>
+              </tr>
+                <% num++; }) 
+            }%>
+            
           </table>
           <div id="paging" class="text-center"></div>
           <!-- Button trigger modal -->
@@ -65,36 +73,36 @@
                     <input type="hidden" id="domainSeq" name="domainSeq" />
                     <div class="form-group">
                       <label class="col-sm-2 control-label">그룹명</label>
-                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="domainGroupName" name="domainGroupName" placeholder="그룹명"></div>
+                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="domainGroupName" name="domainGroupName" placeholder="그룹명" onblur="checkValidation($(this), 'varchar', 10, 'N');"></div>
                     </div>
                     <div class="form-group">
                       <label for="inputEmail3" class="col-sm-2 control-label">도메인명</label>
-                      <div class="col-sm-8 formContent"><input type="text" class="form-control" id="domainName" name="domainName" placeholder="도메인명"></div>
+                      <div class="col-sm-8 formContent"><input type="text" class="form-control" id="domainName" name="domainName" placeholder="도메인명" onblur="checkValidation($(this), 'varchar', 20, 'N');"></div>
                       <button type="button" class="btn btn-default" id="checkDomainNameBtn">확인</button>
                     </div>
                     <div class="form-group">
                       <label for="inputEmail3" class="col-sm-2 control-label">영문약어명</label>
-                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="domainAbbreviation" name="domainAbbreviation" placeholder="영문약어명"></div>
+                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="domainAbbreviation" name="domainAbbreviation" placeholder="영문약어명" onblur="checkValidation($(this), 'varchar', 200, 'Y');"></div>
                     </div>
                     <div class="form-group">
                       <label for="inputEmail3" class="col-sm-2 control-label">영문명</label>
-                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="domainFullName" name="domainFullName" placeholder="영문명"></div>
+                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="domainFullName" name="domainFullName" placeholder="영문명" onblur="checkValidation($(this), 'varchar', 255, 'Y');"></div>
                     </div>
                     <div class="form-group">
                       <label for="inputEmail3" class="col-sm-2 control-label">데이터타입</label>
-                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="domainDataType" name="domainDataType" placeholder="데이터타입"></div>
+                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="domainDataType" name="domainDataType" placeholder="데이터타입" onblur="checkValidation($(this), 'varchar', 16, 'N');"></div>
                     </div>
                     <div class="form-group">
                       <label for="inputEmail3" class="col-sm-2 control-label">길이</label>
-                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="domainDataLength" name="domainDataLength" placeholder="길이"></div>
+                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="domainDataLength" name="domainDataLength" placeholder="길이" onblur="checkValidation($(this), 'number', 65535, 'N');"></div>
                     </div>
                     <div class="form-group">
                       <label for="inputEmail3" class="col-sm-2 control-label">소수</label>
-                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="domainDataDecimal" name="domainDataDecimal" placeholder="소수"></div>
+                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="domainDataDecimal" name="domainDataDecimal" placeholder="소수" onblur="checkValidation($(this), 'number', 255, 'N');"></div>
                     </div>
                     <div class="form-group">
                       <label for="inputEmail3" class="col-sm-2 control-label">정의</label>
-                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="domainDefinition" name="domainDefinition" placeholder="정의"></div>
+                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="domainDefinition" name="domainDefinition" placeholder="정의" onblur="checkValidation($(this), 'varchar', 500, 'Y');"></div>
                     </div>
                   </div>
                   <div class="modal-footer">

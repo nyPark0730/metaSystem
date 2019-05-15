@@ -33,6 +33,12 @@
           <tbody>
             <% 
             var data = JSON.parse(list);
+            if (data.length == 0) { %>
+              <tr>
+                <td colspan="8" class="text-center">조회된 데이터가 없습니다.</td>
+              </tr>
+            <% 
+            } else { 
             var num = 1;
             data.forEach(function(value){ %>
             <tr>
@@ -45,7 +51,8 @@
               <td class="text-center" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['WRITEDATE'] %></td>
               <td class="text-center"><button type="button" class="btn btn-danger" onclick="deleteProcess('word', <%=value['SEQ']%>, <%=currentPage%>);">삭제</button>&nbsp;<button type="button" class="btn btn-default" onclick="getHistory('word', <%=value['SEQ']%>);">이력</button></th>
             </tr>
-              <% num++; }) %>
+              <% num++; })
+            }%>
             </tbody>
           </table>
           <div id="paging" class="text-center"></div>
@@ -67,15 +74,15 @@
                     <input type="hidden" id="wordSeq" name="wordSeq" />
                     <div class="form-group">
                       <label class="col-sm-2 control-label">단어명</label>
-                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="wordName" name="wordName" placeholder="단어"></div>
+                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="wordName" name="wordName" placeholder="단어명" onblur="checkValidation($(this), 'varchar', 20, 'N');"></div>
                     </div>
                     <div class="form-group">
                       <label for="inputEmail3" class="col-sm-2 control-label">영문약어명</label>
-                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="wordAbbreviation" name="wordAbbreviation" placeholder="영문약어명"></div>
+                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="wordAbbreviation" name="wordAbbreviation" placeholder="영문약어명" onblur="checkValidation($(this), 'varchar', 100, 'N');"></div>
                     </div>
                     <div class="form-group">
                       <label for="inputEmail3" class="col-sm-2 control-label">영문명</label>
-                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="wordFullName" name="wordFullName" placeholder="영문명"></div>
+                      <div class="col-sm-10 formContent"><input type="text" class="form-control" id="wordFullName" name="wordFullName" placeholder="영문명" onblur="checkValidation($(this), 'varchar', 150, 'N');"></div>
                     </div>
                     <div class="form-group">
                       <label for="inputEmail3" class="col-sm-2 control-label">구분</label>
@@ -88,7 +95,7 @@
                       </div>
                       <div class="form-group">
                         <label for="inputEmail3" class="col-sm-2 control-label">정의</label>
-                        <div class="col-sm-10 formContent"><input type="text" class="form-control" id="wordDefinition" name="wordDefinition" placeholder="정의"></div>
+                        <div class="col-sm-10 formContent"><input type="text" class="form-control" id="wordDefinition" name="wordDefinition" placeholder="정의" onblur="checkValidation($(this), 'varchar', 500, 'Y');"></div>
                       </div>
                   </div>
                   <div class="modal-footer">

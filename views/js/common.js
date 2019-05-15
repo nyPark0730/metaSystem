@@ -274,19 +274,24 @@ function getSeachKeyword (postData) {
               + '<tr>';
         var number = 1;
         var mode = "'"+$("#mode").val()+"'";
-        $.each(data.list, function(key, value){
-          list += '<tr>'
-                  + '<td class="text-center">'+ number + '</td>'
-                  + '<td>'+ value.NAME + '</td>'
-                  + '<td>'+ value.ABBREVIATION + '</td>'
-                  + '<td>'+ value.FULLNAME + '</td>'
-                  + '<td class="text-center">'+ value.SORTATION + '</td>'
-                  + '<td>'+ value.DEFINITION + '</td>'
-                  + '<td class="text-center">'+ value.WRITEDATE + '</td>'
-                  + '<td class="text-center"><button type="button" class="btn btn-danger" onclick="deleteProcess('+mode+','+  value.SEQ + ','+$("#currentPage").val()+');">삭제</button>&nbsp;<button type="button" class="btn btn-default" onclick="getHistory('+mode+','+  value.SEQ + ');">이력</button></td>'
-                + '</tr>';
-          number++;
-        });
+        console.log(data.list.length);
+        if (data.list.length == 0) {
+          list += '<tr><td colspan="8" class="text-center">조회된 데이터가 없습니다.</td></tr>';
+        } else {
+          $.each(data.list, function(key, value){
+            list += '<tr>'
+                    + '<td class="text-center">'+ number + '</td>'
+                    + '<td>'+ value.NAME + '</td>'
+                    + '<td>'+ value.ABBREVIATION + '</td>'
+                    + '<td>'+ value.FULLNAME + '</td>'
+                    + '<td class="text-center">'+ value.SORTATION + '</td>'
+                    + '<td>'+ value.DEFINITION + '</td>'
+                    + '<td class="text-center">'+ value.WRITEDATE + '</td>'
+                    + '<td class="text-center"><button type="button" class="btn btn-danger" onclick="deleteProcess('+mode+','+  value.SEQ + ','+$("#currentPage").val()+');">삭제</button>&nbsp;<button type="button" class="btn btn-default" onclick="getHistory('+mode+','+  value.SEQ + ');">이력</button></td>'
+                  + '</tr>';
+            number++;
+          });
+        }
       } else if ("domain" == $("#mode").val()) {  // 표준도메인 키워드 검색
         list += '<tr>'
                 +'<th class="text-center">순번</td>'
@@ -301,20 +306,24 @@ function getSeachKeyword (postData) {
               + '<tr>';
         var number = 1;
         var mode = "'"+$("#mode").val()+"'";
-        $.each(data.list, function(key, value){
-          list += '<tr>'
-                  + '<td class="text-center">'+ number + '</td>'
-                  + '<td>'+ value.GROUPNAME + '</td>'
-                  + '<td>'+ value.NAME + '</td>'
-                  + '<td>'+ value.ABBREVIATION + '</td>'
-                  + '<td>'+ value.FULLNAME + '</td>'
-                  + '<td class="text-center">'+ value.DATATYPE + '('+ value.DATALENGTH +','+value.DATADECIMAL+')</td>'
-                  + '<td>'+ value.DEFINITION + '</td>'
-                  + '<td class="text-center">'+ value.WRITEDATE + '</td>'
-                  + '<td class="text-center"><button type="button" class="btn btn-danger" onclick="deleteProcess('+mode+','+  value.SEQ + ','+$("#currentPage").val()+');">삭제</button>&nbsp;<button type="button" class="btn btn-default" onclick="getHistory('+mode+','+  value.SEQ + ');">이력</button></td>'
-                + '</tr>';
-          number++;
-        });
+        if (data.list.length == 0) {
+          list += '<tr><td colspan="9" class="text-center">조회된 데이터가 없습니다.</td></tr>';
+        } else {
+          $.each(data.list, function(key, value){
+            list += '<tr>'
+                    + '<td class="text-center">'+ number + '</td>'
+                    + '<td>'+ value.GROUPNAME + '</td>'
+                    + '<td>'+ value.NAME + '</td>'
+                    + '<td>'+ value.ABBREVIATION + '</td>'
+                    + '<td>'+ value.FULLNAME + '</td>'
+                    + '<td class="text-center">'+ value.DATATYPE + '('+ value.DATALENGTH +','+value.DATADECIMAL+')</td>'
+                    + '<td>'+ value.DEFINITION + '</td>'
+                    + '<td class="text-center">'+ value.WRITEDATE + '</td>'
+                    + '<td class="text-center"><button type="button" class="btn btn-danger" onclick="deleteProcess('+mode+','+  value.SEQ + ','+$("#currentPage").val()+');">삭제</button>&nbsp;<button type="button" class="btn btn-default" onclick="getHistory('+mode+','+  value.SEQ + ');">이력</button></td>'
+                  + '</tr>';
+            number++;
+          });
+        }
       }
       $("#listTbl").html(list);
       var mode = new Object();
@@ -324,4 +333,34 @@ function getSeachKeyword (postData) {
       paging(data.totalCount, $("#listCount").val(), $("#pageCount").val(), data.currentPage, mode);  // 페이징 함수 호출
     }
   });
+}
+
+/**
+ * 유효성 체크
+ * @param {element} element 
+ * @param {string} dataType 데이터타입
+ * @param {number} maxLength 최대길이
+ * @param {boolean} nullYn  NULL 가능 여부
+ */
+function checkValidation(element, dataType, maxLength, nullYn) {
+  var value = element.val();
+  var placeholder = element.attr("placeholder");
+
+  if (dataType == 'number') { // 데이터타입이 NUMBER 인 경우 숫자인지 체크
+    if (isNaN(value)) {
+      alert(placeholder + ' 은/는 숫자만 입력 가능합니다.');
+      return false;
+    } else if (value > maxLength) {
+      alert(placeholder + " 은/는 " + maxLength + "이하만 입력 가능합니다.");
+      return false;
+    }
+  } else if (value.length > maxLength) {  // 최대 길이 체크
+    alert(placeholder + " 은/는 " + maxLength + "자까지 입력 가능합니다.");
+    return false;
+  }
+  if (nullYn == "N" && value.length == 0) {  // NULL 가능 여부 체크
+    alert(placeholder + " 을/를 입력하세요.");
+    return false;
+  }
+  return true;
 }
