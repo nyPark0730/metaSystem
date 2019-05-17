@@ -2,7 +2,6 @@ var express = require('express');
 var app = express();
 var path = require('path');
 var db = require('./lib/db.js');
-//var template = require('./lib/template.js');
 var bodyParser = require('body-parser');
 var excel = require('excel4node');
 var listCount = 5;  // 한 페이지에 표시될 데이터 개수
@@ -53,7 +52,7 @@ app.get('/excelDownload/:mode/', function (request, response, next) {
           ws.cell(1, 4).string('영문명');
           ws.cell(1, 5).string('구분');
           ws.cell(1, 6).string('정의');
-          ws.cell(1, 7).string('작성일');
+          ws.cell(1, 7).string('수정일');
 
           list.forEach(function(value, index){
             ws.cell(index+2, 1).number(index+1);
@@ -94,7 +93,7 @@ app.get('/excelDownload/:mode/', function (request, response, next) {
           ws.cell(1, 5).string('영문명');
           ws.cell(1, 6).string('데이터타입');
           ws.cell(1, 7).string('정의');
-          ws.cell(1, 8).string('작성일');
+          ws.cell(1, 8).string('수정일');
 
           list.forEach(function(value, index){
             ws.cell(index+2, 1).number(index+1);
@@ -145,7 +144,6 @@ app.get('/:mode/:page', function (request, response, next) {
             if (error) {
               next(error);
             }
-            //var html = template.theme("word", list);
             response.render('word.ejs', {list : JSON.stringify(list), totalCount : totalCount, currentPage : page, mode : mode});
           }
         );
@@ -178,7 +176,6 @@ app.get('/:mode/:page', function (request, response, next) {
             if (error) {
               next(error);
             }
-            //var html = template.theme("word", list);
             response.render('domain.ejs', {list : JSON.stringify(list), totalCount : totalCount, currentPage : page, mode : mode});
           }
         );
@@ -386,6 +383,7 @@ app.post('/keywordSearch/:mode', function (request, response, next) {
     whereMode = 'LIKE';
     keyword = '%'+keyword+'%';
   }
+  
   var mode = path.parse(request.params.mode).base;
 
   if ("name" == post.condition) {
@@ -397,54 +395,76 @@ app.post('/keywordSearch/:mode', function (request, response, next) {
   } 
 
   if ('word' == mode) {
-    db.query( // 페이징 처리를 위해 총 개수 조회
-      `SELECT COUNT(*) COUNT FROM WORD WHERE
-      upper(${condition}) ${whereMode} upper(?)`, [keyword], function (error, result) {
-        if (error) {
-          next(error);
+    if ('=' == whereMode) {
+      db.query(
+        `SELECT 
+          SEQ, 
+          NAME, 
+          ABBREVIATION, 
+          FULLNAME, 
+          SORTATION, 
+          IFNULL(DEFINITION, '') DEFINITION, 
+          DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
+        FROM 
+          WORD
+        WHERE
+          upper(${condition}) = upper(?)
+          `, [keyword], function (error, list) {
+          if (error) {
+            next(error);
+          }
+          response.json(list);
+        });
+    } else {
+      db.query( // 페이징 처리를 위해 총 개수 조회
+        `SELECT COUNT(*) COUNT FROM WORD WHERE
+        upper(${condition}) ${whereMode} upper(?)`, [keyword], function (error, result) {
+          if (error) {
+            next(error);
+          }
+          var totalCount = result[0]['COUNT'];
+          var limitStart = (page-1) * listCount;  // 조회될 LIMIT START
+  
+          db.query(
+            `SELECT 
+              SEQ, 
+              NAME, 
+              ABBREVIATION, 
+              FULLNAME, 
+              SORTATION, 
+              IFNULL(DEFINITION, '') DEFINITION, 
+              DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
+            FROM 
+              WORD
+            WHERE
+              upper(${condition}) ${whereMode} upper(?)
+            LIMIT ?, ?
+              `, [keyword, limitStart, listCount], function (error, list) {
+              if (error) {
+                next(error);
+              }
+  
+              var result = new Object();
+              result.list = list;
+              result.totalCount = totalCount;
+              result.currentPage = page;
+              result.mode = mode;
+              response.json(result);
+            });
         }
-        var totalCount = result[0]['COUNT'];
-        var limitStart = (page-1) * listCount;  // 조회될 LIMIT START
-
-        db.query(
-          `SELECT 
-            SEQ, 
-            NAME, 
-            ABBREVIATION, 
-            FULLNAME, 
-            SORTATION, 
-            IFNULL(DEFINITION, '') DEFINITION, 
-            DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
-          FROM 
-            WORD
-          WHERE
-            upper(${condition}) ${whereMode} upper(?)
-          LIMIT ?, ?
-            `, [keyword, limitStart, listCount], function (error, list) {
-            if (error) {
-              next(error);
-            }
-
-            var result = new Object();
-            result.list = list;
-            result.totalCount = totalCount;
-            result.currentPage = page;
-            result.mode = mode;
-            response.json(result);
-          });
-      }
-    );
+      );
+    }
+    
   } else if ('domain' == mode) {
 
     db.query( // 페이징 처리를 위해 총 개수 조회
       `SELECT COUNT(*) COUNT FROM DOMAIN WHERE
-      upper(${condition}) ${whereMode} upper(?)`, [keyword], function (error, result) {
+      upper(${condition}) LIKE upper(?)`, [keyword], function (error, result) {
         if (error) {
           next(error);
         }
         var totalCount = result[0]['COUNT'];
         var limitStart = (page-1) * listCount;  // 조회될 LIMIT START
-
         db.query(
           `SELECT 
             SEQ, 
@@ -460,7 +480,7 @@ app.post('/keywordSearch/:mode', function (request, response, next) {
           FROM 
             DOMAIN
           WHERE
-            upper(${condition}) ${whereMode} upper(?)
+            upper(${condition}) LIKE upper(?)
           LIMIT ?, ?
             `, [keyword, limitStart, listCount], function (error, list) {
             if (error) {
