@@ -4,7 +4,7 @@ var path = require('path');
 var db = require('./lib/db.js');
 var bodyParser = require('body-parser');
 var excel = require('excel4node');
-var listCount = 5;  // 한 페이지에 표시될 데이터 개수
+var listCount = 30;  // 한 페이지에 표시될 데이터 개수
 app.use(express.static(path.join(__dirname, 'www')));
 app.use('/bootstrap', express.static('bootstrap-3.3.2'));
 app.use('/js', express.static(path.join(__dirname,  'bootstrap-3.3.2', 'dist', 'js')));

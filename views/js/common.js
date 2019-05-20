@@ -356,8 +356,8 @@ function checkValidation() {
     targetArray.push(['domainAbbreviation', 'varchar', 200, 'N']);
     targetArray.push(['domainFullName', 'varchar', 255, 'N']);
     targetArray.push(['domainDataType', 'varchar', 16, 'N']);
-    targetArray.push(['domainDataLength', 'number', 65535, 'N']);
-    targetArray.push(['domainDataDecimal', 'number', 255, 'N']);
+    targetArray.push(['domainDataLength', 'number', 65535, 'Y']);
+    targetArray.push(['domainDataDecimal', 'number', 255, 'Y']);
     targetArray.push(['domainDefinition', 'varchar', 500, 'Y']);
     targetArray.push(['id', 'varchar', 50, 'N']);
   }
