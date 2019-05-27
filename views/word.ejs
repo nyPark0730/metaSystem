@@ -20,14 +20,17 @@
           <table class="table table-bordered table-hover" id="listTbl">
             <thead>
             <tr>
-              <th class="text-center active">순번</th>
-              <th class="text-center active">단어명</th>
-              <th class="text-center active">영문약어명</th>
-              <th class="text-center active">영문명</th>
-              <th class="text-center active">구분</th>
-              <th class="text-center active">정의</th>
-              <th class="text-center active">수정일</th>
-              <th class="text-center active" data-field="deleteAndHistory">삭제/이력관리</th>
+              <th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">표준단어<br>중복체크</th>
+              <th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">영문약어<br>중복체크</th>
+              <th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">영문명<br>중복체크</th>
+              <th class="text-center active" width="6%" style="vertical-align: middle;">순번</th>
+              <th class="text-center active" width="6%" style="vertical-align: middle;">단어명</th>
+              <th class="text-center active" width="8%" style="vertical-align: middle;">영문약어명</th>
+              <th class="text-center active" width="10%" style="vertical-align: middle;">영문명</th>
+              <th class="text-center active" width="7%" style="vertical-align: middle;">구분</th>
+              <th class="text-center active" width="24%" style="vertical-align: middle;">정의</th>
+              <th class="text-center active" width="8%" style="vertical-align: middle;">수정일</th>
+              <th class="text-center active" data-field="deleteAndHistory" width="13%" style="vertical-align: middle;">삭제/이력관리</th>
             </tr>
           </thead>
           <tbody>
@@ -42,14 +45,17 @@
             var num = 1;
             data.forEach(function(value){ %>
             <tr>
-              <td class="text-center" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=num %></td>
-              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['NAME'] %></td>
-              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['ABBREVIATION'] %></td>
-              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['FULLNAME'] %></td>
-              <td class="text-center" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['SORTATION'] %></td>
-              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['DEFINITION'] %></td>
-              <td class="text-center" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['WRITEDATE'] %></td>
-              <td class="text-center"><button type="button" class="btn btn-danger" onclick="deleteProcess('word', <%=value['SEQ']%>, <%=currentPage%>);">삭제</button>&nbsp;<button type="button" class="btn btn-default" onclick="getHistory('word', <%=value['SEQ']%>);">이력</button></th>
+              <td class="text-center" width="6%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['WORDSAMECOUNT'] %></td>
+              <td class="text-center" width="6%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['ABBREVIATIONSAMECOUNT'] %></td>
+              <td class="text-center" width="6%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['FULLNAMESAMECOUNT'] %></td>
+              <td class="text-center" width="6%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=num %></td>
+              <td width="6%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['NAME'] %></td>
+              <td width="8%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['ABBREVIATION'] %></td>
+              <td width="10%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['FULLNAME'] %></td>
+              <td class="text-center" width="7%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['SORTATION'] %></td>
+              <td width="24%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['DEFINITION'] %></td>
+              <td class="text-center" width="8%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['WRITEDATE'] %></td>
+              <td class="text-center" width="13%"><button type="button" class="btn btn-danger" onclick="deleteProcess('word', <%=value['SEQ']%>, <%=currentPage%>);">삭제</button>&nbsp;<button type="button" class="btn btn-default" onclick="getHistory('word', <%=value['SEQ']%>);">이력</button></th>
             </tr>
               <% num++; })
             }%>

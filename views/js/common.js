@@ -265,14 +265,17 @@ function getSeachKeyword (postData) {
       var list = "";
       if ("word" == $("#mode").val()) { // 표준단어 키워드 검색
         list += '<tr>'
-                + '<th class="text-center active">순번</td>'
-                + '<th class="text-center active">단어명</td>'
-                + '<th class="text-center active">영문약어명</td>'
-                + '<th class="text-center active">영문명</td>'
-                + '<th class="text-center active">구분</td>'
-                + '<th class="text-center active">정의</td>'
-                + '<th class="text-center active">수정일</td>'
-                + '<th class="text-center active">삭제/이력관리</th>'
+                + '<th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">표준단어 중복체크</td>'
+                + '<th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">영문약어 중복체크</td>'
+                + '<th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">영문명 중복체크</td>'
+                + '<th class="text-center active" width="6%" style="vertical-align: middle;">>순번</td>'
+                + '<th class="text-center active" width="6%" style="vertical-align: middle;">단어명</td>'
+                + '<th class="text-center active" width="8%" style="vertical-align: middle;">영문약어명</td>'
+                + '<th class="text-center active" width="10%" style="vertical-align: middle;">영문명</td>'
+                + '<th class="text-center active" width="7%" style="vertical-align: middle;">구분</td>'
+                + '<th class="text-center active" width="24%" style="vertical-align: middle;">정의</td>'
+                + '<th class="text-center active" width="8%" style="vertical-align: middle;">수정일</td>'
+                + '<th class="text-center active" width="13%" style="vertical-align: middle;">삭제/이력관리</th>'
               + '<tr>';
         var number = 1;
         var mode = "'"+$("#mode").val()+"'";
@@ -282,6 +285,9 @@ function getSeachKeyword (postData) {
         } else {
           $.each(data.list, function(key, value){
             list += '<tr>'
+                    + "<td class='text-center' onclick='getInfoForUpdate("+JSON.stringify(value)+")'>"+ value.WORDSAMECOUNT + '</td>'
+                    + "<td class='text-center' onclick='getInfoForUpdate("+JSON.stringify(value)+")'>"+ value.ABBREVIATIONSAMECOUNT + '</td>'
+                    + "<td class='text-center' onclick='getInfoForUpdate("+JSON.stringify(value)+")'>"+ value.FULLNAMESAMECOUNT + '</td>'
                     + "<td class='text-center' onclick='getInfoForUpdate("+JSON.stringify(value)+")'>"+ number + '</td>'
                     + "<td onclick='getInfoForUpdate("+JSON.stringify(value)+")'>"+ value.NAME + '</td>'
                     + "<td onclick='getInfoForUpdate("+JSON.stringify(value)+")'>"+ value.ABBREVIATION + '</td>'

@@ -20,15 +20,15 @@
           </form>
           <table class="table table-bordered table-hover" id="listTbl">
             <tr>
-              <th class="text-center active">순번</th>
-              <th class="text-center active">그룹명</th>
-              <th class="text-center active">도메인명</th>
-              <th class="text-center active">영문약어명</th>
-              <th class="text-center active">영문명</th>
-              <th class="text-center active">데이터타입</th>
-              <th class="text-center active">정의</th>
-              <th class="text-center active">수정일</th>
-              <th class="text-center active">삭제/이력관리</th>
+              <th class="text-center active" style="vertical-align: middle;">순번</th>
+              <th class="text-center active" style="vertical-align: middle;">그룹명</th>
+              <th class="text-center active" style="vertical-align: middle;">도메인명</th>
+              <th class="text-center active" style="vertical-align: middle;">영문약어명</th>
+              <th class="text-center active" style="vertical-align: middle;">영문명</th>
+              <th class="text-center active" style="vertical-align: middle;">데이터타입</th>
+              <th class="text-center active" style="vertical-align: middle;">정의</th>
+              <th class="text-center active" style="vertical-align: middle;">수정일</th>
+              <th class="text-center active" style="vertical-align: middle;">삭제/이력관리</th>
             </tr>
             <% 
             var data = JSON.parse(list);
@@ -46,7 +46,12 @@
                 <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['NAME'] %></td>
                 <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['ABBREVIATION'] %></td>
                 <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['FULLNAME'] %></td>
-                <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['DATATYPE'] %>(<%=value['DATALENGTH'] %>, <%=value['DATADECIMAL'] %>)</td>
+                <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)">
+                  <% if(value['DATATYPE'] == 'DATE' || value['DATATYPE'] == 'CLOB') {%>
+                    <%=value['DATATYPE'] %>
+                  <%} else { if (value['DATADECIMAL'] == null) {%>
+                    <%=value['DATATYPE'] %>(<%=value['DATALENGTH'] %>)
+                  <%} else { %><%=value['DATATYPE'] %>(<%=value['DATALENGTH'] %>, <%=value['DATADECIMAL'] %>)<%}}%></td>
                 <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['DEFINITION'] %></td>
                 <td class="text-center" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['WRITEDATE'] %></td>
                 <td class="text-center"><button type="button" class="btn btn-danger" onclick="deleteProcess('<%=mode%>', <%=value['SEQ']%>, <%=currentPage%>);">삭제</button>&nbsp;<button type="button" class="btn btn-default" onclick="getHistory('<%=mode%>', <%=value['SEQ']%>);">이력</button></th>

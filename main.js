@@ -30,7 +30,10 @@ app.get('/excelDownload/:mode/', function (request, response, next) {
   var mode = path.parse(request.params.mode).base;
   if ('word' == mode) { // 단어 전체 조회
     db.query(
-      `SELECT 
+      `SELECT
+        (SELECT  COUNT(*)FROM WORD W1 where W1.NAME=W2.NAME) WORDSAMECOUNT,
+        (SELECT  COUNT(*)FROM WORD W1 where W1.ABBREVIATION=W2.ABBREVIATION) ABBREVIATIONSAMECOUNT,
+        (SELECT  COUNT(*)FROM WORD W1 where W1.FULLNAME=W2.FULLNAME) FULLNAMESAMECOUNT, 
         NAME, 
         ABBREVIATION, 
         FULLNAME, 
@@ -38,7 +41,7 @@ app.get('/excelDownload/:mode/', function (request, response, next) {
         IFNULL(DEFINITION, '') DEFINITION, 
         DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
       FROM 
-        WORD`, function (error, list) {
+        WORD W2`, function (error, list) {
           if (error) {
             next(error);
           }
@@ -46,22 +49,28 @@ app.get('/excelDownload/:mode/', function (request, response, next) {
           var wb = new excel.Workbook();
           var ws = wb.addWorksheet('표준단어');
           
-          ws.cell(1, 1).string('순번');
-          ws.cell(1, 2).string('단어명');
-          ws.cell(1, 3).string('영문약어명');
-          ws.cell(1, 4).string('영문명');
-          ws.cell(1, 5).string('구분');
-          ws.cell(1, 6).string('정의');
-          ws.cell(1, 7).string('수정일');
+          ws.cell(1, 1).string('표준단어 중복체크');
+          ws.cell(1, 2).string('영문약어 중복체크');
+          ws.cell(1, 3).string('영문명 중복체크');
+          ws.cell(1, 4).string('순번');
+          ws.cell(1, 5).string('단어명');
+          ws.cell(1, 6).string('영문약어명');
+          ws.cell(1, 7).string('영문명');
+          ws.cell(1, 8).string('구분');
+          ws.cell(1, 9).string('정의');
+          ws.cell(1, 10).string('수정일');
 
           list.forEach(function(value, index){
-            ws.cell(index+2, 1).number(index+1);
-            ws.cell(index+2, 2).string(value['NAME']);
-            ws.cell(index+2, 3).string(value['ABBREVIATION']);
-            ws.cell(index+2, 4).string(value['FULLNAME']);
-            ws.cell(index+2, 5).string(value['SORTATION']);
-            ws.cell(index+2, 6).string(value['DEFINITION']);
-            ws.cell(index+2, 7).string(value['WRITEDATE']);
+            ws.cell(index+2, 1).number(value['WORDSAMECOUNT']);
+            ws.cell(index+2, 2).number(value['ABBREVIATIONSAMECOUNT']);
+            ws.cell(index+2, 3).number(value['FULLNAMESAMECOUNT']);
+            ws.cell(index+2, 4).number(index+1);
+            ws.cell(index+2, 5).string(value['NAME']);
+            ws.cell(index+2, 6).string(value['ABBREVIATION']);
+            ws.cell(index+2, 7).string(value['FULLNAME']);
+            ws.cell(index+2, 8).string(value['SORTATION']);
+            ws.cell(index+2, 9).string(value['DEFINITION']);
+            ws.cell(index+2, 10).string(value['WRITEDATE']);
           });
           wb.write(mode+'.xlsx', response);
         }
@@ -131,6 +140,9 @@ app.get('/:mode/:page', function (request, response, next) {
 
         db.query(
           `SELECT 
+            (SELECT  COUNT(*)FROM WORD W1 where W1.NAME=W2.NAME) WORDSAMECOUNT,
+            (SELECT  COUNT(*)FROM WORD W1 where W1.ABBREVIATION=W2.ABBREVIATION) ABBREVIATIONSAMECOUNT,
+            (SELECT  COUNT(*)FROM WORD W1 where W1.FULLNAME=W2.FULLNAME) FULLNAMESAMECOUNT,
             SEQ, 
             NAME, 
             ABBREVIATION, 
@@ -139,7 +151,9 @@ app.get('/:mode/:page', function (request, response, next) {
             IFNULL(DEFINITION, '') DEFINITION, 
             DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
           FROM 
-            WORD
+            WORD W2
+          ORDER BY 
+            NAME ASC
           LIMIT ?, ?`, [limitStart, listCount],  function (error, list) {
             if (error) {
               next(error);
@@ -398,6 +412,9 @@ app.post('/keywordSearch/:mode', function (request, response, next) {
     if ('=' == whereMode) {
       db.query(
         `SELECT 
+          (SELECT  COUNT(*)FROM WORD W1 where W1.NAME=W2.NAME) WORDSAMECOUNT,
+          (SELECT  COUNT(*)FROM WORD W1 where W1.ABBREVIATION=W2.ABBREVIATION) ABBREVIATIONSAMECOUNT,
+          (SELECT  COUNT(*)FROM WORD W1 where W1.FULLNAME=W2.FULLNAME) FULLNAMESAMECOUNT,
           SEQ, 
           NAME, 
           ABBREVIATION, 
@@ -406,7 +423,7 @@ app.post('/keywordSearch/:mode', function (request, response, next) {
           IFNULL(DEFINITION, '') DEFINITION, 
           DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
         FROM 
-          WORD
+          WORD W2
         WHERE
           upper(${condition}) = upper(?)
           `, [keyword], function (error, list) {
@@ -427,6 +444,9 @@ app.post('/keywordSearch/:mode', function (request, response, next) {
   
           db.query(
             `SELECT 
+              (SELECT  COUNT(*)FROM WORD W1 where W1.NAME=W2.NAME) WORDSAMECOUNT,
+              (SELECT  COUNT(*)FROM WORD W1 where W1.ABBREVIATION=W2.ABBREVIATION) ABBREVIATIONSAMECOUNT,
+              (SELECT  COUNT(*)FROM WORD W1 where W1.FULLNAME=W2.FULLNAME) FULLNAMESAMECOUNT,
               SEQ, 
               NAME, 
               ABBREVIATION, 
@@ -435,7 +455,7 @@ app.post('/keywordSearch/:mode', function (request, response, next) {
               IFNULL(DEFINITION, '') DEFINITION, 
               DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
             FROM 
-              WORD
+              WORD W2
             WHERE
               upper(${condition}) ${whereMode} upper(?)
             LIMIT ?, ?
