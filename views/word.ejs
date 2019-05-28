@@ -5,8 +5,8 @@
       </head>
       <body>
         <% include ./menu.ejs %>
-        <div class="container" style="margin-top:60px;">
-          <form class="form-inline pull-right" style="margin-bottom:10px;">
+        <div class="container" style="margin-top:60px; width: 90%;">
+          <div class="form-inline pull-right" style="margin-bottom:10px;">
             <div class="form-group">
               <select class="form-control" id="searchCondition">
                 <option value="name">단어명</option>
@@ -16,7 +16,7 @@
               <input type="text" id="keyword" placeholder="키워드" class="form-control">
               <button type="button" class="btn btn-success" id="searchBtn">검색</button>
             </div>
-          </form>
+          </div>
           <table class="table table-bordered table-hover" id="listTbl">
             <thead>
             <tr>
@@ -24,9 +24,9 @@
               <th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">영문약어<br>중복체크</th>
               <th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">영문명<br>중복체크</th>
               <th class="text-center active" width="6%" style="vertical-align: middle;">순번</th>
-              <th class="text-center active" width="6%" style="vertical-align: middle;">단어명</th>
-              <th class="text-center active" width="8%" style="vertical-align: middle;">영문약어명</th>
-              <th class="text-center active" width="10%" style="vertical-align: middle;">영문명</th>
+              <th class="text-center active" width="6%" style="vertical-align: middle;"><span id="nameOrder" class="order" style="cursor:pointer;">단어명</span></th>
+              <th class="text-center active" width="8%" style="vertical-align: middle;"><span id="abbreviationOrder" class="order" style="cursor:pointer;">영문약어명</span></th>
+              <th class="text-center active" width="10%" style="vertical-align: middle;"><span id="fullNameOrder" class="order" style="cursor:pointer;">영문명</span></th>
               <th class="text-center active" width="7%" style="vertical-align: middle;">구분</th>
               <th class="text-center active" width="24%" style="vertical-align: middle;">정의</th>
               <th class="text-center active" width="8%" style="vertical-align: middle;">수정일</th>

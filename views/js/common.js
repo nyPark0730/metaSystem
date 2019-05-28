@@ -1,5 +1,8 @@
 $(document).ready(function () {
   var mode = $("#mode").val();  // word: 표준단어, domain: 표준도메인
+  if (mode != 'word' && mode != 'domain') {
+    mode = 'word';
+  }
 
   // 메뉴바 하이라이트 표기
   if ("word" == mode) {
@@ -9,6 +12,59 @@ $(document).ready(function () {
     $("#navWord").removeClass("active");
     $("#navDomain").addClass("active");
   }
+
+  var pathName = $(location).attr('pathname');
+  var path = pathName.split("/");
+  $("#orderTarget").val(path[3]+"/"+path[4]);
+
+  if (path[3] == "name") {
+    if (path[4] == "asc") {
+      if (mode == "word") {
+        $("#nameOrder").text("단어명▲");
+      } else {
+        $("#nameOrder").text("도메인명▲");
+      }
+    } else {
+      if (mode == "word") {
+        $("#nameOrder").text("단어명▼");
+      } else {
+        $("#nameOrder").text("도메인명▼");
+      }
+    }
+  } else if (path[3] == "abbreviation") {
+    if (path[4] == "asc") {
+      $("#abbreviationOrder").text("영문약어명▲");
+    } else {
+      $("#abbreviationOrder").text("영문약어명▼");
+    }
+  } else if (path[3] == "fullname") {
+    if (path[4] == "asc") {
+      $("#fullNameOrder").text("영문명▲");
+    } else {
+      $("#fullNameOrder").text("영문명▼");
+    }
+  }
+
+  $(".order").click(function () {
+    var id = $(this).attr("id");
+    var value = $(this).text();
+    var orderTarget = "seq";
+    var order = "asc";
+
+    if (id == "nameOrder") {
+      orderTarget = "name";
+    } else if (id == "abbreviationOrder") {
+      orderTarget = "abbreviation";
+    } else if (id == "fullNameOrder") {
+      orderTarget = "fullname";
+    }
+    if (value.search("▼") >= 0) {
+      order = "asc";
+    } else if (value.search("▲") >= 0) {
+      order = "desc";
+    }
+    location.replace("/"+mode+"/"+$("#currentPage").val()+"/"+orderTarget+"/"+order); 
+  });
 
   // 페이징 함수 호출
   paging($("#totalCount").val(), $("#listCount").val(), $("#pageCount").val(), $("#currentPage").val(), mode);  
@@ -31,7 +87,7 @@ $(document).ready(function () {
 
   // 전체 엑셀 다운로드 버튼 클릭
   $("#totalExcelDownBtn").click(function() {
-    location.replace("/excelDownload/" + mode); 
+    location.replace("/excelDownload/" + mode);
   });
 
   // 현재 페이지 엑셀 다운로드 버튼 클릭
@@ -54,7 +110,21 @@ $(document).ready(function () {
     data.condition =  searchCondition;
     data.keyword = keyword;
     data.page = 1;
+    data.order = $("#orderTarget").val();
     getSeachKeyword (data);   // 키워드에 맞는 목록 조회
+  });
+
+  $("#keyword").keydown(function(key) {
+   if (key.keyCode == 13) {
+      var data = new Object();
+      var searchCondition = $("#searchCondition").val();  // 조회 조건
+      var keyword = $("#keyword").val();                  // 조회 키워드
+      data.condition =  searchCondition;
+      data.keyword = keyword;
+      data.page = 1;
+      data.order = $("#orderTarget").val();
+      getSeachKeyword (data);   // 키워드에 맞는 목록 조회
+    }
   });
 });
 
@@ -204,8 +274,8 @@ function paging(totalCount, listCount, pageCount, currentPage, mode){
     if (typeof mode == "object") {  // 키워드 검색일때
       html += "<span class='page-link' onClick=keywordPageNumClick(\'"+mode.condition+"\',\'"+mode.keyword+"\',"+prev+");>Previous</span>";
     } else {
-      html += "<a class='page-link' href='/"+mode+"/1' id='first'><<</a>";
-      html += "<a class='page-link' href='/"+mode+"/"+prev+"' id='prev'><</a>";
+      html += "<a class='page-link' href='/"+mode+"/1"+"/"+$("#orderTarget").val()+"' id='first'><<</a>";
+      html += "<a class='page-link' href='/"+mode+"/"+prev+"/"+$("#orderTarget").val()+"' id='prev'><</a>";
     }
     html += "</li>";
   }
@@ -219,7 +289,7 @@ function paging(totalCount, listCount, pageCount, currentPage, mode){
       if (typeof mode == "object") {  // 키워드 검색일때
         html += "<span class='page-link' onClick=keywordPageNumClick(\'"+mode.condition+"\',\'"+mode.keyword+"\',"+i+"); >" + i + "</span>";
       } else {
-        html += "<a class='page-link' href='/"+mode+"/"+i+"' id=" + i + ">" + i + "</span>";
+        html += "<a class='page-link' href='/"+mode+"/"+i+"/"+$("#orderTarget").val()+"' id=" + i + ">" + i + "</span>";
       }
       html += "</li>";
     }
@@ -231,8 +301,8 @@ function paging(totalCount, listCount, pageCount, currentPage, mode){
     if (typeof mode == "object") {  // 키워드 검색일때
       html += "<span class='page-link' onClick=keywordPageNumClick(\'"+mode.condition+"\',\'"+mode.keyword+"\',"+next+"); >></span>";
     } else {
-      html += "<a class='page-link' href='/"+mode+"/"+next+"' id='next'>></a>";
-      html += "<a class='page-link' href='/"+mode+"/"+totalPage+"' id='totalPage'>>></a>";
+      html += "<a class='page-link' href='/"+mode+"/"+next+"/"+$("#orderTarget").val()+"' id='next'>></a>";
+      html += "<a class='page-link' href='/"+mode+"/"+totalPage+"/"+$("#orderTarget").val()+"' id='totalPage'>>></a>";
     }
     html += "</li>";
   }
@@ -269,10 +339,10 @@ function getSeachKeyword (postData) {
       var list = "";
       if ("word" == $("#mode").val()) { // 표준단어 키워드 검색
         list += '<tr>'
-                + '<th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">표준단어 중복체크</td>'
-                + '<th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">영문약어 중복체크</td>'
-                + '<th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">영문명 중복체크</td>'
-                + '<th class="text-center active" width="6%" style="vertical-align: middle;">>순번</td>'
+                + '<th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">표준단어<br>중복체크</td>'
+                + '<th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">영문약어<br>중복체크</td>'
+                + '<th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">영문명<br>중복체크</td>'
+                + '<th class="text-center active" width="6%" style="vertical-align: middle;">순번</td>'
                 + '<th class="text-center active" width="6%" style="vertical-align: middle;">단어명</td>'
                 + '<th class="text-center active" width="8%" style="vertical-align: middle;">영문약어명</td>'
                 + '<th class="text-center active" width="10%" style="vertical-align: middle;">영문명</td>'

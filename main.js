@@ -198,6 +198,91 @@ app.get('/:mode/:page', function (request, response, next) {
   }
 });
 
+app.get('/:mode/:page/:orderTarget/:order', function (request, response, next) {
+  var mode = path.parse(request.params.mode).base;
+  var page = path.parse(request.params.page).base;
+  var orderTarget = path.parse(request.params.orderTarget).base;
+  var order = path.parse(request.params.order).base;
+
+  if (orderTarget != 'seq' && orderTarget != 'name' && orderTarget != 'abbreviation' && orderTarget != 'fullname') {
+    orderTarget = 'seq';
+  }
+  if (order != 'asc' && order != 'desc') {
+    order = 'asc';
+  }
+  var orderBy = orderTarget + " " + order;
+
+  if ("word" == mode) { // 표준 단어 조회
+    db.query( // 페이징 처리를 위해 총 개수 조회
+      `SELECT COUNT(*) COUNT FROM WORD`, function (error, result) {
+        if (error) {
+          next(error);
+        }
+        var totalCount = result[0]['COUNT'];
+        var limitStart = (page-1) * listCount;  // 조회될 LIMIT START
+        db.query(
+          `SELECT 
+            (SELECT  COUNT(*)FROM WORD W1 where W1.NAME=W2.NAME) WORDSAMECOUNT,
+            (SELECT  COUNT(*)FROM WORD W1 where W1.ABBREVIATION=W2.ABBREVIATION) ABBREVIATIONSAMECOUNT,
+            (SELECT  COUNT(*)FROM WORD W1 where W1.FULLNAME=W2.FULLNAME) FULLNAMESAMECOUNT,
+            SEQ, 
+            NAME, 
+            ABBREVIATION, 
+            FULLNAME, 
+            SORTATION, 
+            IFNULL(DEFINITION, '') DEFINITION, 
+            DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
+          FROM 
+            WORD W2
+          ORDER BY ${orderBy}
+          LIMIT ?, ?`, [ limitStart, listCount],  function (error, list) {
+            if (error) {
+              next(error);
+            }
+            response.render('word.ejs', {list : JSON.stringify(list), totalCount : totalCount, currentPage : page, mode : mode});
+          }
+        );
+      }
+    );
+  } else if ("domain" == mode) {  // 표준 도메인 조회
+    db.query( // 페이징 처리를 위해 총 개수 조회
+      `SELECT COUNT(*) COUNT FROM DOMAIN`, function (error, result) {
+        if (error) {
+          next(error);
+        }
+        var totalCount = result[0]['COUNT'];
+        var limitStart = (page-1) * listCount;
+
+        db.query(
+          `SELECT 
+            SEQ, 
+            GROUPNAME, 
+            NAME, 
+            DATATYPE, 
+            DATALENGTH, 
+            DATADECIMAL,
+            ABBREVIATION,
+            FULLNAME,
+            IFNULL(DEFINITION, '') DEFINITION, 
+            DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
+          FROM 
+            DOMAIN
+          ORDER BY ${orderBy}
+          LIMIT ?, ?`, [limitStart, listCount],  function (error, list) {
+            if (error) {
+              next(error);
+            }
+            response.render('domain.ejs', {list : JSON.stringify(list), totalCount : totalCount, currentPage : page, mode : mode});
+          }
+        );
+      }
+    );
+  } else {
+    response.status(404).send('404: Sorry cant find that!');
+  }
+});
+
+
 /**
  * 추가
  * mode : word, domain
@@ -347,7 +432,6 @@ app.post('/update/:mode/:page', function (request, response, next) {
  * seq : 삭제할 고유번호
  * page : 페이지번호
  */
-
 app.get('/delete/:mode/:seq/:page', function (request, response, next) {
   var seq = path.parse(request.params.seq).base;
   var mode = path.parse(request.params.mode).base;
@@ -391,7 +475,16 @@ app.post('/keywordSearch/:mode', function (request, response, next) {
   var keyword = post.keyword;
   var whereMode = post.whereMode;
   var page = post.page;
+  var orderTarget = post.order.split("/")[0];
+  var order = post.order.split("/")[1];
 
+  if (orderTarget != 'seq' && orderTarget != 'name' && orderTarget != 'abbreviation' && orderTarget != 'fullname') {
+    orderTarget = 'seq';
+  }
+  if (order != 'asc' && order != 'desc') {
+    order = 'asc';
+  }
+  var orderBy = orderTarget + " " + order;
   if ('equal' == whereMode) {
     whereMode = '=';
   } else {
@@ -459,6 +552,8 @@ app.post('/keywordSearch/:mode', function (request, response, next) {
               WORD W2
             WHERE
               upper(${condition}) ${whereMode} upper(?)
+            ORDER BY
+              ${orderBy}
             LIMIT ?, ?
               `, [keyword, limitStart, listCount], function (error, list) {
               if (error) {
@@ -501,7 +596,9 @@ app.post('/keywordSearch/:mode', function (request, response, next) {
           FROM 
             DOMAIN
           WHERE
-            upper(${condition}) LIKE upper(?)
+            UPPER(${condition}) LIKE UPPER(?)
+          ORDER BY
+            ${orderBy}
           LIMIT ?, ?
             `, [keyword, limitStart, listCount], function (error, list) {
             if (error) {

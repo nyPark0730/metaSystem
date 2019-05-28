@@ -1,18 +1,19 @@
 <nav class="navbar navbar-inverse navbar-fixed-top">
-    <div class="container">
+    <div class="container" style="float: left;">
         <div class="navbar-header">
             <a class="navbar-brand" href="/">데이터 표준화</a>
         </div>
         <div id="navbar" class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
-                <li id="navWord"><a href="/word/1">표준단어</a></li>
-                <li id="navDomain"><a href="/domain/1">표준도메인</a></li>
+                <li id="navWord"><a href="/word/1/seq/asc">표준단어</a></li>
+                <li id="navDomain"><a href="/domain/1/seq/asc">표준도메인</a></li>
             </ul>
         </div><!--/.nav-collapse -->
     </div>
 </nav>
 
 <input type="hidden" id="mode" value="<%=mode%>">
+<input type="hidden" id="orderTarget">
 <input type="hidden" id="totalCount" value="<%=totalCount%>">
 <input type="hidden" id="currentPage" value="<%=currentPage%>">
 <input type="hidden" id="listCount" value="30">
