@@ -339,17 +339,17 @@ function getSeachKeyword (postData) {
       var list = "";
       if ("word" == $("#mode").val()) { // 표준단어 키워드 검색
         list += '<tr>'
-                + '<th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">표준단어<br>중복체크</td>'
-                + '<th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">영문약어<br>중복체크</td>'
-                + '<th class="text-center active" width="6%" style="font-size: 12px; vertical-align: middle;">영문명<br>중복체크</td>'
-                + '<th class="text-center active" width="6%" style="vertical-align: middle;">순번</td>'
-                + '<th class="text-center active" width="6%" style="vertical-align: middle;">단어명</td>'
-                + '<th class="text-center active" width="8%" style="vertical-align: middle;">영문약어명</td>'
-                + '<th class="text-center active" width="10%" style="vertical-align: middle;">영문명</td>'
-                + '<th class="text-center active" width="7%" style="vertical-align: middle;">구분</td>'
-                + '<th class="text-center active" width="24%" style="vertical-align: middle;">정의</td>'
+                + '<th class="text-center active" width="4%" style="vertical-align: middle;">표준단어<br>중복체크</td>'
+                + '<th class="text-center active" width="4%" style="vertical-align: middle;">영문약어<br>중복체크</td>'
+                + '<th class="text-center active" width="4%" style="vertical-align: middle;">영문명<br>중복체크</td>'
+                + '<th class="text-center active" width="4%" style="vertical-align: middle;">순번</td>'
+                + '<th class="text-center active" width="9%" style="vertical-align: middle;">단어명</td>'
+                + '<th class="text-center active" width="10%" style="vertical-align: middle;">영문약어명</td>'
+                + '<th class="text-center active" width="16%" style="vertical-align: middle;">영문명</td>'
+                + '<th class="text-center active" width="5%" style="vertical-align: middle;">구분</td>'
+                + '<th class="text-center active" width="28%" style="vertical-align: middle;">정의</td>'
                 + '<th class="text-center active" width="8%" style="vertical-align: middle;">수정일</td>'
-                + '<th class="text-center active" width="13%" style="vertical-align: middle;">삭제/이력관리</th>'
+                + '<th class="text-center active" width="14%" style="vertical-align: middle;">삭제/이력관리</th>'
               + '<tr>';
         var number = 1;
         var mode = "'"+$("#mode").val()+"'";
