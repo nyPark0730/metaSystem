@@ -128,7 +128,7 @@ app.get('/excelDownload/:mode/', function (request, response, next) {
 app.get('/:mode/:page', function (request, response, next) {
   var mode = path.parse(request.params.mode).base;
   var page = path.parse(request.params.page).base;
-  
+
   if ("word" == mode) { // 표준 단어 조회
     db.query( // 페이징 처리를 위해 총 개수 조회
       `SELECT COUNT(*) COUNT FROM WORD`, function (error, result) {
@@ -152,8 +152,6 @@ app.get('/:mode/:page', function (request, response, next) {
             DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
           FROM 
             WORD W2
-          ORDER BY 
-            NAME ASC
           LIMIT ?, ?`, [limitStart, listCount],  function (error, list) {
             if (error) {
               next(error);
@@ -186,7 +184,7 @@ app.get('/:mode/:page', function (request, response, next) {
             DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
           FROM 
             DOMAIN
-            LIMIT ?, ?`, [limitStart, listCount],  function (error, list) {
+          LIMIT ?, ?`, [limitStart, listCount],  function (error, list) {
             if (error) {
               next(error);
             }
@@ -207,7 +205,10 @@ app.get('/:mode/:page', function (request, response, next) {
 app.post('/create/:mode', function (request, response, next) {
   var mode = path.parse(request.params.mode).base;
   var post = request.body;
-
+  var totalCount = post.hdnTotalCount;
+  var listCount = post.hdnListCount;
+  var totalPage = Math.ceil(totalCount / listCount);
+  
   if ("word" == mode) { // 표준 단어 추가
     db.query(
       `
@@ -227,7 +228,7 @@ app.post('/create/:mode', function (request, response, next) {
             if(error) {
               next(error);
             }
-            response.redirect(`/word/1`);
+            response.redirect(`/word/${totalPage}`);
           }
         );
       }
@@ -251,7 +252,7 @@ app.post('/create/:mode', function (request, response, next) {
             if(error) {
               next(error);
             }
-            response.redirect(`/domain/1`);
+            response.redirect(`/domain/${totalPage}`);
           }
         );
       }

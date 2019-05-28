@@ -42,7 +42,7 @@
               </tr>
             <% 
             } else { 
-            var num = 1;
+            var num = (currentPage - 1) * 30 + 1;
             data.forEach(function(value){ %>
             <tr>
               <td class="text-center" width="6%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['WORDSAMECOUNT'] %></td>
@@ -67,6 +67,7 @@
           <button type="button" id="currentExcelDownBtn" class="btn btn-default pull-right" style="margin-right:5px;">현재 페이지 엑셀 다운로드</button>
           <button type="button" id="totalExcelDownBtn" class="btn btn-default pull-right" style="margin-right:5px;">전체 엑셀 다운로드</button>
           <button type="button" class="btn btn-primary pull-right" data-toggle="modal" id="addBtn" style="margin-right:5px;">추가</button>
+          <br><br><br>
           <!-- Modal -->
           <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -132,9 +133,5 @@
             </div>
           </div>
         </div><!-- /.container -->
-       
-        <script>
-
-        </script>
       </body>
     </html>

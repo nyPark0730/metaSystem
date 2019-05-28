@@ -23,6 +23,8 @@ $(document).ready(function () {
     }
     $("#myModalLabel").text("추가");
     $("#executeBtn").text("추가");
+    $("#executeForm").append("<input type='hidden' id='hdnTotalCount' name='hdnTotalCount' value='"+$("#totalCount").val()+"'/>");
+    $("#executeForm").append("<input type='hidden' id='hdnListCount' name='hdnListCount' value='"+$("#listCount").val()+"'/>");
     $("#executeForm").attr("action", "/create/" + mode);
     $("#myModal").modal("show");
   });
@@ -202,7 +204,8 @@ function paging(totalCount, listCount, pageCount, currentPage, mode){
     if (typeof mode == "object") {  // 키워드 검색일때
       html += "<span class='page-link' onClick=keywordPageNumClick(\'"+mode.condition+"\',\'"+mode.keyword+"\',"+prev+");>Previous</span>";
     } else {
-      html += "<a class='page-link' href='/"+mode+"/"+prev+"' id='prev'>Previous</a>";
+      html += "<a class='page-link' href='/"+mode+"/1' id='first'><<</a>";
+      html += "<a class='page-link' href='/"+mode+"/"+prev+"' id='prev'><</a>";
     }
     html += "</li>";
   }
@@ -226,9 +229,10 @@ function paging(totalCount, listCount, pageCount, currentPage, mode){
   if (last < totalPage) {
     html += "<li class='page-item'>";
     if (typeof mode == "object") {  // 키워드 검색일때
-      html += "<span class='page-link' onClick=keywordPageNumClick(\'"+mode.condition+"\',\'"+mode.keyword+"\',"+next+"); >Next</span>";
+      html += "<span class='page-link' onClick=keywordPageNumClick(\'"+mode.condition+"\',\'"+mode.keyword+"\',"+next+"); >></span>";
     } else {
-      html += "<a class='page-link' href='/"+mode+"/"+next+"' id='next'>Next</a>";
+      html += "<a class='page-link' href='/"+mode+"/"+next+"' id='next'>></a>";
+      html += "<a class='page-link' href='/"+mode+"/"+totalPage+"' id='totalPage'>>></a>";
     }
     html += "</li>";
   }
