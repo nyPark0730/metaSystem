@@ -43,6 +43,12 @@ $(document).ready(function () {
     } else {
       $("#fullNameOrder").text("영문명▼");
     }
+  } else if (path[3] == "groupname") {
+    if (path[4] == "asc") {
+      $("#groupNameOrder").text("그룹명▲");
+    } else {
+      $("#groupNameOrder").text("그룹명▼");
+    }
   }
 
   $(".order").click(function () {
@@ -57,6 +63,8 @@ $(document).ready(function () {
       orderTarget = "abbreviation";
     } else if (id == "fullNameOrder") {
       orderTarget = "fullname";
+    } else if (id == "groupNameOrder") {
+      orderTarget = "groupname";
     }
     if (value.search("▼") >= 0) {
       order = "asc";
@@ -339,23 +347,23 @@ function getSeachKeyword (postData) {
       var list = "";
       if ("word" == $("#mode").val()) { // 표준단어 키워드 검색
         list += '<tr>'
-                + '<th class="text-center active" width="4%" style="vertical-align: middle;">표준단어<br>중복체크</td>'
-                + '<th class="text-center active" width="4%" style="vertical-align: middle;">영문약어<br>중복체크</td>'
-                + '<th class="text-center active" width="4%" style="vertical-align: middle;">영문명<br>중복체크</td>'
+                + '<th class="text-center active" width="5%" style="vertical-align: middle;">표준단어<br>중복체크</td>'
+                + '<th class="text-center active" width="5%" style="vertical-align: middle;">영문약어<br>중복체크</td>'
+                + '<th class="text-center active" width="5%" style="vertical-align: middle;">영문명<br>중복체크</td>'
                 + '<th class="text-center active" width="4%" style="vertical-align: middle;">순번</td>'
-                + '<th class="text-center active" width="9%" style="vertical-align: middle;">단어명</td>'
-                + '<th class="text-center active" width="10%" style="vertical-align: middle;">영문약어명</td>'
-                + '<th class="text-center active" width="16%" style="vertical-align: middle;">영문명</td>'
+                + '<th class="text-center active" width="8%" style="vertical-align: middle;">단어명</td>'
+                + '<th class="text-center active" width="12%" style="vertical-align: middle;">영문약어명</td>'
+                + '<th class="text-center active" width="15%" style="vertical-align: middle;">영문명</td>'
                 + '<th class="text-center active" width="5%" style="vertical-align: middle;">구분</td>'
-                + '<th class="text-center active" width="28%" style="vertical-align: middle;">정의</td>'
+                + '<th class="text-center active" width="24%" style="vertical-align: middle;">정의</td>'
                 + '<th class="text-center active" width="8%" style="vertical-align: middle;">수정일</td>'
-                + '<th class="text-center active" width="14%" style="vertical-align: middle;">삭제/이력관리</th>'
+                + '<th class="text-center active" width="8%" style="vertical-align: middle;">삭제/이력관리</th>'
               + '<tr>';
         var number = 1;
         var mode = "'"+$("#mode").val()+"'";
 
         if (data.list.length == 0) {
-          list += '<tr><td colspan="8" class="text-center">조회된 데이터가 없습니다.</td></tr>';
+          list += '<tr><td colspan="11" class="text-center">조회된 데이터가 없습니다.</td></tr>';
         } else {
           $.each(data.list, function(key, value){
             list += '<tr>'
@@ -376,15 +384,15 @@ function getSeachKeyword (postData) {
         }
       } else if ("domain" == $("#mode").val()) {  // 표준도메인 키워드 검색
         list += '<tr>'
-                +'<th class="text-center active">순번</td>'
-                +'<th class="text-center active">그룹명</td>'
-                +'<th class="text-center active">도메인명</td>'
-                +'<th class="text-center active">영문약어명</td>'
-                +'<th class="text-center active">영문명</td>'
-                +'<th class="text-center active">데이터타입</td>'
-                +'<th class="text-center active">정의</td>'
-                +'<th class="text-center active">수정일</td>'
-                +'<th class="text-center active">삭제/이력관리</th>'
+                +'<th width="3%" class="text-center active">순번</td>'
+                +'<th width="9%" class="text-center active">그룹명</td>'
+                +'<th width="9%" class="text-center active">도메인명</td>'
+                +'<th width="10%" class="text-center active">영문약어명</td>'
+                +'<th width="10%" class="text-center active">영문명</td>'
+                +'<th width="9%" class="text-center active">데이터타입</td>'
+                +'<th width="32%" class="text-center active">정의</td>'
+                +'<th width="9%" class="text-center active">수정일</td>'
+                +'<th width="9%" class="text-center active">삭제/이력관리</th>'
               + '<tr>';
         var number = 1;
         var mode = "'"+$("#mode").val()+"'";

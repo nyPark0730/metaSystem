@@ -6,9 +6,44 @@
       <body>
         <% include ./menu.ejs %>
         index PAGE
-        </div><!-- /.container -->
+       
+        <div class="container" style="margin-top:60px;">
+          <!-- Jumbotron -->
+          <div class="jumbotron">
+            <h1 style="text-shadow: 2px 2px 2px gray; ">데이터 표준화</h1><br>
+            <h4 style="text-shadow: 0px 1px 0px gray; ">
+              데이터 정보 요소에 대한 명칭, 정의, 형식, 규칙에 대한 원칙을 수립하여 전사적으로 적용하는 것을 의미한다. <br>
+              데이터 표준화 작업은 데이터의 정확한 의미를 파악할 수 있게 할 뿐만 아니라 <br>
+              데이터에 대한 상반된 시각을 조정하는 역할을 수행한다.</h4>
+          </div>
+          <div class="row">
+            <div class="col-lg-6">
+              <h2>표준단어</h2>
+              <p class="text-danger">전사 관점에서의 단어 사전 관리, 금칙어의 사전 정의 및 관리</p>
+              <p>
+                <ul>
+                  <li>용어에 대한 한글명과 영문명을 일관되게 정의</li>
+                  <li>동일한 개념을 의미하는 용어(또는 표준용어)의 생성 예방</li>
+                  <li>표준용어의 영문명 작성 기준이 됨</li>
+                  <li>테이블 및 칼럼의 한글명만 작성하면 영문명은 표준 단어에 의해 자동으로 결정</li>
+                </ul>
+              </p>
+              <p><a class="btn btn-primary" href="/word/1/seq/asc" role="button">View details &raquo;</a></p>
+            </div>
+            <div class="col-lg-6">
+              <h2>표준도메인</h2>
+              <p class="text-danger">대표 및 그룹 속성에 대한 데이터 타입, 길이, 소수점 이하 길이 등을 사전 정의 및 관리</p>
+              <p>
+                  <ul>
+                      <li>칼럼에 대한 성질을 그룹핑한 개념</li>
+                      <li>문자형, 숫자형, 일자형, 시간형으로 분류할 수 있고, 더 세부적으로는 명, 주소, ID(이상 문자형), 금액, 율, 수량(이상 숫자형) 등으로 분류</li>
+                    </ul>
+              <p><a class="btn btn-primary" href="/domain/1/seq/asc" role="button">View details &raquo;</a></p>
+           </div>
+          </div>
+        </div> <!-- /container -->
         <script src="https://code.jquery.com/jquery-1.12.4.min.js" integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ" crossorigin="anonymous"></script>
-        <script src="/js/bootstrap.min.js"></script>
+        <script src="/js/bootstrap.js"></script>
         <script>
         </script>
       </body>

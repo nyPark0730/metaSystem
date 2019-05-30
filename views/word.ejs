@@ -5,6 +5,7 @@
       </head>
       <body>
         <% include ./menu.ejs %>
+        <% include ./pageInfo.ejs %>
         <div class="container" style="margin-top:60px; width: 90%;">
           <div class="form-inline pull-right" style="margin-bottom:10px;">
             <div class="form-group">
@@ -20,17 +21,17 @@
           <table class="table table-bordered table-hover" id="listTbl">
             <thead>
             <tr>
-              <th class="text-center active" width="4%" style="vertical-align: middle;">표준단어<br>중복체크</th>
-              <th class="text-center active" width="4%" style="vertical-align: middle;">영문약어<br>중복체크</th>
-              <th class="text-center active" width="4%" style="vertical-align: middle;">영문명<br>중복체크</th>
+              <th class="text-center active" width="5%" style="vertical-align: middle;">표준단어<br>중복체크</th>
+              <th class="text-center active" width="5%" style="vertical-align: middle;">영문약어<br>중복체크</th>
+              <th class="text-center active" width="5%" style="vertical-align: middle;">영문명<br>중복체크</th>
               <th class="text-center active" width="4%" style="vertical-align: middle;">순번</th>
-              <th class="text-center active" width="9%" style="vertical-align: middle;"><span id="nameOrder" class="order" style="cursor:pointer;">단어명</span></th>
-              <th class="text-center active" width="10%" style="vertical-align: middle;"><span id="abbreviationOrder" class="order" style="cursor:pointer;">영문약어명</span></th>
-              <th class="text-center active" width="16%" style="vertical-align: middle;"><span id="fullNameOrder" class="order" style="cursor:pointer;">영문명</span></th>
+              <th class="text-center active" width="8%" style="vertical-align: middle;"><span id="nameOrder" class="order" style="cursor:pointer;">단어명</span></th>
+              <th class="text-center active" width="12%" style="vertical-align: middle;"><span id="abbreviationOrder" class="order" style="cursor:pointer;">영문약어명</span></th>
+              <th class="text-center active" width="15%" style="vertical-align: middle;"><span id="fullNameOrder" class="order" style="cursor:pointer;">영문명</span></th>
               <th class="text-center active" width="5%" style="vertical-align: middle;">구분</th>
-              <th class="text-center active" width="28%" style="vertical-align: middle;">정의</th>
+              <th class="text-center active" width="24%" style="vertical-align: middle;">정의</th>
               <th class="text-center active" width="8%" style="vertical-align: middle;">수정일</th>
-              <th class="text-center active" data-field="deleteAndHistory" width="14%" style="vertical-align: middle;">삭제/이력관리</th>
+              <th class="text-center active" data-field="deleteAndHistory" width="8%" style="vertical-align: middle;">삭제/이력관리</th>
             </tr>
           </thead>
           <tbody>
@@ -38,24 +39,24 @@
             var data = JSON.parse(list);
             if (data.length == 0) { %>
               <tr>
-                <td colspan="8" class="text-center">조회된 데이터가 없습니다.</td>
+                <td colspan="11" class="text-center">조회된 데이터가 없습니다.</td>
               </tr>
             <% 
             } else { 
             var num = (currentPage - 1) * 30 + 1;
             data.forEach(function(value){ %>
             <tr>
-              <td class="text-center" width="4%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['WORDSAMECOUNT'] %></td>
-              <td class="text-center" width="4%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['ABBREVIATIONSAMECOUNT'] %></td>
-              <td class="text-center" width="4%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['FULLNAMESAMECOUNT'] %></td>
-              <td class="text-center" width="4%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=num %></td>
-              <td width="9%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['NAME'] %></td>
-              <td width="10%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['ABBREVIATION'] %></td>
-              <td width="16%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['FULLNAME'] %></td>
-              <td class="text-center" width="5%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['SORTATION'] %></td>
-              <td width="28%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['DEFINITION'] %></td>
-              <td class="text-center" width="8%" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['WRITEDATE'] %></td>
-              <td class="text-center" width="14%"><button type="button" class="btn btn-danger" onclick="deleteProcess('word', <%=value['SEQ']%>, <%=currentPage%>);">삭제</button>&nbsp;<button type="button" class="btn btn-default" onclick="getHistory('word', <%=value['SEQ']%>);">이력</button></th>
+              <td class="text-center" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['WORDSAMECOUNT'] %></td>
+              <td class="text-center" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['ABBREVIATIONSAMECOUNT'] %></td>
+              <td class="text-center" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['FULLNAMESAMECOUNT'] %></td>
+              <td class="text-center" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=num %></td>
+              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['NAME'] %></td>
+              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['ABBREVIATION'] %></td>
+              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['FULLNAME'] %></td>
+              <td class="text-center" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['SORTATION'] %></td>
+              <td onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['DEFINITION'] %></td>
+              <td class="text-center" onclick="getInfoForUpdate(<%=JSON.stringify(value) %>)"><%=value['WRITEDATE'] %></td>
+              <td class="text-center" ><button type="button" class="btn btn-danger" onclick="deleteProcess('word', <%=value['SEQ']%>, <%=currentPage%>);">삭제</button>&nbsp;<button type="button" class="btn btn-default" onclick="getHistory('word', <%=value['SEQ']%>);">이력</button></th>
             </tr>
               <% num++; })
             }%>

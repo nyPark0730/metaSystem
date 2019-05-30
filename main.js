@@ -19,7 +19,7 @@ app.set('views', './views');
  * root 접근 → 표준단어를 default 페이지로 설정
  */
 app.get('/', function (request, response) {
-  response.redirect('/word/1');
+  response.render('index.ejs');
 });
 
 /**
@@ -124,87 +124,14 @@ app.get('/excelDownload/:mode/', function (request, response, next) {
  * 메뉴별 접근
  * mode : word, domain
  * page : 페이지 번호
- */ 
-app.get('/:mode/:page', function (request, response, next) {
-  var mode = path.parse(request.params.mode).base;
-  var page = path.parse(request.params.page).base;
-
-  if ("word" == mode) { // 표준 단어 조회
-    db.query( // 페이징 처리를 위해 총 개수 조회
-      `SELECT COUNT(*) COUNT FROM WORD`, function (error, result) {
-        if (error) {
-          next(error);
-        }
-        var totalCount = result[0]['COUNT'];
-        var limitStart = (page-1) * listCount;  // 조회될 LIMIT START
-
-        db.query(
-          `SELECT 
-            (SELECT  COUNT(*)FROM WORD W1 where W1.NAME=W2.NAME) WORDSAMECOUNT,
-            (SELECT  COUNT(*)FROM WORD W1 where W1.ABBREVIATION=W2.ABBREVIATION) ABBREVIATIONSAMECOUNT,
-            (SELECT  COUNT(*)FROM WORD W1 where W1.FULLNAME=W2.FULLNAME) FULLNAMESAMECOUNT,
-            SEQ, 
-            NAME, 
-            ABBREVIATION, 
-            FULLNAME, 
-            SORTATION, 
-            IFNULL(DEFINITION, '') DEFINITION, 
-            DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
-          FROM 
-            WORD W2
-          LIMIT ?, ?`, [limitStart, listCount],  function (error, list) {
-            if (error) {
-              next(error);
-            }
-            response.render('word.ejs', {list : JSON.stringify(list), totalCount : totalCount, currentPage : page, mode : mode});
-          }
-        );
-      }
-    );
-  } else if ("domain" == mode) {  // 표준 도메인 조회
-    db.query( // 페이징 처리를 위해 총 개수 조회
-      `SELECT COUNT(*) COUNT FROM DOMAIN`, function (error, result) {
-        if (error) {
-          next(error);
-        }
-        var totalCount = result[0]['COUNT'];
-        var limitStart = (page-1) * listCount;
-
-        db.query(
-          `SELECT 
-            SEQ, 
-            GROUPNAME, 
-            NAME, 
-            DATATYPE, 
-            DATALENGTH, 
-            DATADECIMAL,
-            ABBREVIATION,
-            FULLNAME,
-            IFNULL(DEFINITION, '') DEFINITION, 
-            DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
-          FROM 
-            DOMAIN
-          LIMIT ?, ?`, [limitStart, listCount],  function (error, list) {
-            if (error) {
-              next(error);
-            }
-            response.render('domain.ejs', {list : JSON.stringify(list), totalCount : totalCount, currentPage : page, mode : mode});
-          }
-        );
-      }
-    );
-  } else {
-    response.status(404).send('404: Sorry cant find that!');
-  }
-});
-
+ */
 app.get('/:mode/:page/:orderTarget/:order', function (request, response, next) {
   var mode = path.parse(request.params.mode).base;
   var page = path.parse(request.params.page).base;
   var orderTarget = path.parse(request.params.orderTarget).base;
   var order = path.parse(request.params.order).base;
 
-  if (orderTarget != 'seq' && orderTarget != 'name' && orderTarget != 'abbreviation' && orderTarget != 'fullname') {
+  if (orderTarget != 'seq' && orderTarget != 'name' && orderTarget != 'abbreviation' && orderTarget != 'fullname' && orderTarget != 'groupname') {
     orderTarget = 'seq';
   }
   if (order != 'asc' && order != 'desc') {
@@ -235,7 +162,7 @@ app.get('/:mode/:page/:orderTarget/:order', function (request, response, next) {
           FROM 
             WORD W2
           ORDER BY ${orderBy}
-          LIMIT ?, ?`, [ limitStart, listCount],  function (error, list) {
+          LIMIT ?, ?`, [limitStart, listCount],  function (error, list) {
             if (error) {
               next(error);
             }
