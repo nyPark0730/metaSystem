@@ -240,7 +240,7 @@ app.post('/create/:mode', function (request, response, next) {
             if(error) {
               next(error);
             }
-            response.redirect(`/word/${totalPage}`);
+            response.redirect(`/word/${totalPage}/seq/asc`);
           }
         );
       }
@@ -264,7 +264,7 @@ app.post('/create/:mode', function (request, response, next) {
             if(error) {
               next(error);
             }
-            response.redirect(`/domain/${totalPage}`);
+            response.redirect(`/domain/${totalPage}/seq/asc`);
           }
         );
       }
@@ -310,7 +310,7 @@ app.post('/update/:mode/:page', function (request, response, next) {
             if(error) {
               next(error);
             }
-            response.redirect(`/word/${page}`);
+            response.redirect(`/word/${page}/seq/asc`);
           }
         );
       }
@@ -345,7 +345,7 @@ app.post('/update/:mode/:page', function (request, response, next) {
             if(error) {
               next(error);
             }
-            response.redirect(`/domain/${page}`);
+            response.redirect(`/domain/${page}/seq/asc`);
           }
         );
       }
@@ -373,7 +373,7 @@ app.get('/delete/:mode/:seq/:page', function (request, response, next) {
         if (error) {
           next(error);
         } 
-        response.redirect(`/word/${page}`);
+        response.redirect(`/word/${page}/seq/asc`);
       });
     });
   } else if ('domain' == mode) {
@@ -385,7 +385,7 @@ app.get('/delete/:mode/:seq/:page', function (request, response, next) {
         if (error) {
           next(error);
         } 
-        response.redirect(`/domain/${page}`);
+        response.redirect(`/domain/${page}/seq/asc`);
       });
     });
   } else {
@@ -402,8 +402,13 @@ app.post('/keywordSearch/:mode', function (request, response, next) {
   var keyword = post.keyword;
   var whereMode = post.whereMode;
   var page = post.page;
-  var orderTarget = post.order.split("/")[0];
-  var order = post.order.split("/")[1];
+  var orderTarget = '';
+  var order = '';
+
+  if (typeof(post.order) != 'undefined') {
+    orderTarget = post.order.split("/")[0];
+    order = post.order.split("/")[1];
+  }
 
   if (orderTarget != 'seq' && orderTarget != 'name' && orderTarget != 'abbreviation' && orderTarget != 'fullname') {
     orderTarget = 'seq';

@@ -80,8 +80,8 @@ $(document).ready(function () {
   // 추가 버튼 클릭
   $("#addBtn").click(function() {
     // modal 내 내용 초기화
-    $(".modal-body").children(".form-group").children(".col-sm-10").children("input[type=text]").val("");
-    $(".modal-body").children(".form-group").children(".col-sm-10").children("input[type=hidden]").val("");
+    $(".modal-body").children(".form-group").children("div").children("input[type=text]").val("");
+    $(".modal-body").children("input[type=hidden]").val("");
     if ("word" == mode) {
       $("#wordSortation").val("수식어");
     }
