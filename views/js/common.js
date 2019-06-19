@@ -1,9 +1,6 @@
 $(document).ready(function () {
   var mode = $("#mode").val();  // word: 표준단어, domain: 표준도메인
-  if (mode != 'word' && mode != 'domain') {
-    mode = 'word';
-  }
-
+  
   // 메뉴바 하이라이트 표기
   if ("word" == mode) {
     $("#navWord").addClass("active");
@@ -12,13 +9,16 @@ $(document).ready(function () {
     $("#navWord").removeClass("active");
     $("#navDomain").addClass("active");
   }
+  if (mode != 'word' && mode != 'domain') {
+    mode = 'word';
+  }
 
   var pathName = $(location).attr('pathname');
   var path = pathName.split("/");
-  $("#orderTarget").val(path[3]+"/"+path[4]);
+  $("#orderTarget").val(path[4]+"/"+path[5]);
 
-  if (path[3] == "name") {
-    if (path[4] == "asc") {
+  if (path[4] == "name") {
+    if (path[5] == "asc") {
       if (mode == "word") {
         $("#nameOrder").text("단어명▲");
       } else {
@@ -31,20 +31,20 @@ $(document).ready(function () {
         $("#nameOrder").text("도메인명▼");
       }
     }
-  } else if (path[3] == "abbreviation") {
-    if (path[4] == "asc") {
+  } else if (path[4] == "abbreviation") {
+    if (path[5] == "asc") {
       $("#abbreviationOrder").text("영문약어명▲");
     } else {
       $("#abbreviationOrder").text("영문약어명▼");
     }
-  } else if (path[3] == "fullname") {
-    if (path[4] == "asc") {
+  } else if (path[4] == "fullname") {
+    if (path[5] == "asc") {
       $("#fullNameOrder").text("영문명▲");
     } else {
       $("#fullNameOrder").text("영문명▼");
     }
-  } else if (path[3] == "groupname") {
-    if (path[4] == "asc") {
+  } else if (path[4] == "groupname") {
+    if (path[5] == "asc") {
       $("#groupNameOrder").text("그룹명▲");
     } else {
       $("#groupNameOrder").text("그룹명▼");
@@ -71,7 +71,7 @@ $(document).ready(function () {
     } else if (value.search("▲") >= 0) {
       order = "desc";
     }
-    location.replace("/"+mode+"/"+$("#currentPage").val()+"/"+orderTarget+"/"+order); 
+    location.replace("/"+mode+"/list/"+$("#currentPage").val()+"/"+orderTarget+"/"+order); 
   });
 
   // 페이징 함수 호출
@@ -89,13 +89,13 @@ $(document).ready(function () {
     $("#executeBtn").text("추가");
     $("#executeForm").append("<input type='hidden' id='hdnTotalCount' name='hdnTotalCount' value='"+$("#totalCount").val()+"'/>");
     $("#executeForm").append("<input type='hidden' id='hdnListCount' name='hdnListCount' value='"+$("#listCount").val()+"'/>");
-    $("#executeForm").attr("action", "/create/" + mode);
+    $("#executeForm").attr("action", "/" + mode + "/create");
     $("#myModal").modal("show");
   });
 
   // 전체 엑셀 다운로드 버튼 클릭
   $("#totalExcelDownBtn").click(function() {
-    location.replace("/excelDownload/" + mode);
+    location.replace("/" + mode + "/excelDownload/");
   });
 
   // 현재 페이지 엑셀 다운로드 버튼 클릭
@@ -145,9 +145,9 @@ $(document).ready(function () {
 function deleteProcess(mode, seq, page) {
   if(confirm("삭제하시겠습니까?")) {
     if ('word' == mode) {
-      location.replace('/delete/word/'+seq+'/'+page);   // 표준단어 데이터 삭제
+      location.replace('/word/delete/'+seq+'/'+page);   // 표준단어 데이터 삭제
     } else if ('domain' == mode) {
-      location.replace('/delete/domain/'+seq+'/'+page); // 표준도메인 데이터 삭제
+      location.replace('/domain/delete/'+seq+'/'+page); // 표준도메인 데이터 삭제
     }
   }
 }
@@ -158,8 +158,9 @@ function deleteProcess(mode, seq, page) {
  * @param {number} seq : 이력 조회할 고유번호
  */
 function getHistory(mode, seq) {
+
   $.ajax({
-    url:"/getHistory/"+mode+"/"+seq,
+    url:"/"+mode+"/getHistory/"+seq,
     dataType:'json',
     success:function(data){
       var name = "";
@@ -214,7 +215,7 @@ function getHistory(mode, seq) {
       $("#historyTbl").html(list);
       $("#historyModal").modal('show');
     }
-  });
+  }); 
 }
 
 /**
@@ -237,7 +238,7 @@ function getInfoForUpdate(obj) {
   });
   $("#myModalLabel").text("수정");
   $("#executeBtn").text("수정");
-  $("#executeForm").attr("action", "/update/" + mode + "/" + $("#currentPage").val());
+  $("#executeForm").attr("action", "/" + mode + "/update/" + $("#currentPage").val());
   $('#myModal').modal('show'); 
 }
 
@@ -282,8 +283,8 @@ function paging(totalCount, listCount, pageCount, currentPage, mode){
     if (typeof mode == "object") {  // 키워드 검색일때
       html += "<span class='page-link' onClick=keywordPageNumClick(\'"+mode.condition+"\',\'"+mode.keyword+"\',"+prev+");>Previous</span>";
     } else {
-      html += "<a class='page-link' href='/"+mode+"/1"+"/"+$("#orderTarget").val()+"' id='first'><<</a>";
-      html += "<a class='page-link' href='/"+mode+"/"+prev+"/"+$("#orderTarget").val()+"' id='prev'><</a>";
+      html += "<a class='page-link' href='/"+mode+"/list/1"+"/"+$("#orderTarget").val()+"' id='first'><<</a>";
+      html += "<a class='page-link' href='/"+mode+"/list/"+prev+"/"+$("#orderTarget").val()+"' id='prev'><</a>";
     }
     html += "</li>";
   }
@@ -297,7 +298,7 @@ function paging(totalCount, listCount, pageCount, currentPage, mode){
       if (typeof mode == "object") {  // 키워드 검색일때
         html += "<span class='page-link' onClick=keywordPageNumClick(\'"+mode.condition+"\',\'"+mode.keyword+"\',"+i+"); >" + i + "</span>";
       } else {
-        html += "<a class='page-link' href='/"+mode+"/"+i+"/"+$("#orderTarget").val()+"' id=" + i + ">" + i + "</span>";
+        html += "<a class='page-link' href='/"+mode+"/list/"+i+"/"+$("#orderTarget").val()+"' id=" + i + ">" + i + "</span>";
       }
       html += "</li>";
     }
@@ -309,8 +310,8 @@ function paging(totalCount, listCount, pageCount, currentPage, mode){
     if (typeof mode == "object") {  // 키워드 검색일때
       html += "<span class='page-link' onClick=keywordPageNumClick(\'"+mode.condition+"\',\'"+mode.keyword+"\',"+next+"); >></span>";
     } else {
-      html += "<a class='page-link' href='/"+mode+"/"+next+"/"+$("#orderTarget").val()+"' id='next'>></a>";
-      html += "<a class='page-link' href='/"+mode+"/"+totalPage+"/"+$("#orderTarget").val()+"' id='totalPage'>>></a>";
+      html += "<a class='page-link' href='/"+mode+"/list/"+next+"/"+$("#orderTarget").val()+"' id='next'>></a>";
+      html += "<a class='page-link' href='/"+mode+"/list/"+totalPage+"/"+$("#orderTarget").val()+"' id='totalPage'>>></a>";
     }
     html += "</li>";
   }
@@ -339,7 +340,7 @@ function keywordPageNumClick(condition, keyword, page) {
 function getSeachKeyword (postData) {
   var mode = $("#mode").val();
   $.ajax({
-    url:"/keywordSearch/"+mode,
+    url:"/" + mode + "/keywordSearch/",
     type:'post',
     data: postData,
     dataType:'json',
@@ -355,7 +356,7 @@ function getSeachKeyword (postData) {
                 + '<th class="text-center active" width="12%" style="vertical-align: middle;">영문약어명</td>'
                 + '<th class="text-center active" width="15%" style="vertical-align: middle;">영문명</td>'
                 + '<th class="text-center active" width="5%" style="vertical-align: middle;">구분</td>'
-                + '<th class="text-center active" width="24%" style="vertical-align: middle;">정의</td>'
+                + '<th class="text-center active" width="20%" style="vertical-align: middle;">정의</td>'
                 + '<th class="text-center active" width="8%" style="vertical-align: middle;">수정일</td>'
                 + '<th class="text-center active" width="8%" style="vertical-align: middle;">삭제/이력관리</th>'
               + '<tr>';
