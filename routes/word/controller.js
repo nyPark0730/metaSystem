@@ -3,6 +3,8 @@ var path = require('path');
 var excel = require('excel4node');
 var listCount = 30;  // 한 페이지에 표시될 데이터 개수
 
+/* 기능별 모듈 생성, /metaSystem/routes/word/index.js 에서 require 하여 사용 */
+
 /**
  * 리스트 조회
  */
@@ -28,19 +30,19 @@ exports.list = function (request, response, next) {
             var totalCount = result[0]['COUNT'];
             var limitStart = (page-1) * listCount;  // 조회될 LIMIT START
             db.query(
-            `SELECT  (SELECT  COUNT(*)FROM WORD W1 where W1.NAME=W2.NAME) WORDSAMECOUNT
-                    ,(SELECT  COUNT(*)FROM WORD W1 where W1.ABBREVIATION=W2.ABBREVIATION) ABBREVIATIONSAMECOUNT
-                    ,(SELECT  COUNT(*)FROM WORD W1 where W1.FULLNAME=W2.FULLNAME) FULLNAMESAMECOUNT
-                    ,SEQ
-                    ,NAME
-                    ,ABBREVIATION
-                    ,FULLNAME
-                    ,SORTATION
-                    ,IFNULL(DEFINITION, '') DEFINITION
-                    ,DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
-            FROM    WORD W2
-           ORDER BY ${orderBy}
-            LIMIT   ?, ?`, [limitStart, listCount],  function (error, list) {
+                `SELECT  (SELECT COUNT(*)FROM WORD W1 where W1.NAME=W2.NAME) WORDSAMECOUNT
+                        ,(SELECT COUNT(*)FROM WORD W1 where W1.ABBREVIATION=W2.ABBREVIATION) ABBREVIATIONSAMECOUNT
+                        ,(SELECT COUNT(*)FROM WORD W1 where W1.FULLNAME=W2.FULLNAME) FULLNAMESAMECOUNT
+                        ,SEQ
+                        ,NAME
+                        ,ABBREVIATION
+                        ,FULLNAME
+                        ,SORTATION
+                        ,IFNULL(DEFINITION, '') DEFINITION
+                        ,DATE_FORMAT(WRITEDATE, '%Y-%m-%d') WRITEDATE 
+                FROM    WORD W2
+               ORDER BY ${orderBy}
+                LIMIT   ?, ?`, [limitStart, listCount],  function (error, list) {
                     if (error) {
                         next(error);
                     }
@@ -178,10 +180,10 @@ exports.create = function (request, response, next) {
                 VALUES(?, ?, ?, ?, ?, ?, ?, now(), '0')`, 
                 [result.insertId, post.wordName, post.wordAbbreviation, post.wordFullName, post.wordSortation, post.wordDefinition, post.id],
                 function (error, result) {
-                if(error) {
-                    next(error);
-                }
-                response.redirect(`/word/list/${totalPage}/seq/asc`);
+                    if(error) {
+                        next(error);
+                    }
+                    response.redirect(`/word/list/${totalPage}/seq/asc`);
                 }
             );
         }
@@ -198,7 +200,7 @@ exports.update = function (request, response, next) {
     var post = request.body;
   
     db.query(
-    `
+        `
         UPDATE WORD 
         SET  NAME = ?
             ,ABBREVIATION = ?
@@ -220,7 +222,7 @@ exports.update = function (request, response, next) {
                 [post.wordSeq, post.wordName, post.wordAbbreviation, post.wordFullName, post.wordSortation, post.wordDefinition, post.id],
                 function (error, result) {
                     if(error) {
-                    next(error);
+                        next(error);
                     }
                     response.redirect(`/word/list/${page}/seq/asc`);
                 }
@@ -244,7 +246,7 @@ exports.delete = function (request, response, next) {
         } 
         db.query('DELETE FROM WORD WHERE SEQ=?', [seq], function(error, result) { // 단어 테이블 삭제
             if (error) {
-            next(error);
+                next(error);
             } 
             response.redirect(`/word/list/${page}/seq/asc`);
         });
